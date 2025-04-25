@@ -1,0 +1,6 @@
+@Saba_HostAddress = http://localhost:5225
+
+GET {{Saba_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
