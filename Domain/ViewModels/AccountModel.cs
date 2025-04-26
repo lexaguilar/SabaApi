@@ -13,7 +13,7 @@ namespace Saba.Domain.ViewModels
 
         public string Email { get; set; } = null!;
         public int RoleId { get; set; }
-
+        public string Role { get; set; }
         public string Token { get; set; } = null!;
 
         public DateTime Expires { get; set; }

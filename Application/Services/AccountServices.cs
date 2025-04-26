@@ -54,6 +54,8 @@ public class AccountService : IAccountService
         var userReponse = new LoginModelReponse
         {
             UserName = user.UserName,
+            RoleId = user.RoleId,
+            Role = user.Role.Name,
             Email = user.Email,
         };
 

@@ -38,7 +38,7 @@ public class UserRepository : IUserRepository
 
     public Task<User> Get(Func<User, bool> predicate)
     {
-        var user = _context.Users.Where(predicate).FirstOrDefault();
+        var user = _context.Users.Include(x => x.Role).Where(predicate).FirstOrDefault();
 
         return Task.FromResult(user);
     }
