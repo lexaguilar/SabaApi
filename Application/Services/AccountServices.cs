@@ -11,8 +11,11 @@ namespace Saba.Repository;
 public interface IAccountService
 {
     Task<(bool Success, LoginModelReponse? User, string? ErrorMsg)> Login(LoginModel m);
+
     string ForgotPassword(string email);
+
     (bool Success, string Email) ForgotPasswordConfirmation(ForgotPasswordConfirmationModel m);
+
     (bool Success, string ErrorMsg) ChangePassword(ChangePasswordModel m);
 }
 
@@ -42,26 +45,32 @@ public class AccountService : IAccountService
         throw new NotImplementedException();
     }
 
-    public async Task<(bool Success, LoginModelReponse? User, string? ErrorMsg)> Login(LoginModel m)
+    public async Task<(bool Success, LoginModelReponse? User, string ErrorMsg)> Login(LoginModel m)
     {
         var user = await _userRepository.Get(x => x.UserName == m.UserName);
 
         if (user == null || !CryptoHelper.ComparePassword(m.Password, user.Password, user.PasswordSalt))
         {
-                return (false, null, "Invalid username or password.");
+                return (false, null,  "Invalid username or password.");
         }
+
+        var userModel = new UserModel
+        {
+            DisplayName = user.UserName,
+            Role = user.Role.Name,
+            RoleId = user.RoleId,
+            UserName = user.UserName,
+            Email = user.Email,
+        };
 
         var userReponse = new LoginModelReponse
         {
-            UserName = user.UserName,
-            RoleId = user.RoleId,
-            Role = user.Role.Name,
-            Email = user.Email,
+            User = userModel,
         };
 
         var token = AuthenticateUser(userReponse);
         userReponse.Token = token.Token;
-        userReponse.Expires = token.Expires;
+        //userReponse.Expires = token.Expires;
 
         return (true, userReponse, null);
     }

@@ -12,6 +12,7 @@ public interface IUserRepository
     Task<IQueryable<User>> GetAllAsync(Func<User, bool> predicate = null);
     Task AddAsync(User user);
     User Update(User user);
+    Task<int> SaveChangesAsync();
 }
 public class UserRepository : IUserRepository
 {
@@ -49,5 +50,10 @@ public class UserRepository : IUserRepository
 
         return user;
 
+    }
+
+    public async Task<int> SaveChangesAsync()
+    {
+       return await _context.SaveChangesAsync();
     }
 }

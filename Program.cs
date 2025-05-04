@@ -1,20 +1,26 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Saba;
 using Saba.Domain.Models;
 using Saba.Repository;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddDbContext<SabaContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 builder.Services.AddControllers();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddRepositories();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
 
 builder.Services.AddSwaggerGen(opt =>
 {
@@ -27,7 +33,6 @@ builder.Services.AddSwaggerGen(opt =>
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "Bearer",
-        
     });
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -53,7 +58,7 @@ builder.Services.AddAuthentication(opt =>
 {
     opt.RequireHttpsMetadata = false;
     opt.SaveToken = true;
-    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    opt.TokenValidationParameters = new TokenValidationParameters
     {
       //  ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:SecretToken"])),
@@ -74,6 +79,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowAllOrigins");
 
 app.MapControllers();
 

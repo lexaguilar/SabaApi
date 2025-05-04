@@ -11,9 +11,9 @@ public static class ClaimPrincipalExtension
     {
         var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, m.UserName),
-                new Claim(ClaimTypes.Email, m.Email),
-                new Claim(ClaimTypes.Role, m.RoleId.ToString())
+                new Claim(ClaimTypes.NameIdentifier, m.User.UserName),
+                new Claim(ClaimTypes.Email, m.User.Email),
+                new Claim(ClaimTypes.Role, m.User.RoleId.ToString())
              };
 
         var claimsIdentity = new ClaimsIdentity(claims, authenticationScheme);

@@ -9,14 +9,18 @@ namespace Saba.Domain.ViewModels
 
     public class LoginModelReponse
     {
-        public string UserName { get; set; } = null!;
-
-        public string Email { get; set; } = null!;
-        public int RoleId { get; set; }
-        public string Role { get; set; }
         public string Token { get; set; } = null!;
+        public UserModel User { get; set; } = null!;
+     
+    }
 
-        public DateTime Expires { get; set; }
+    public class UserModel{
+        public string Role { get; set; } = null!;
+        public int RoleId { get; set; }
+        public string UserName { get; set; } = null!;
+        public string DisplayName { get; set; } = null!;
+        public string Email { get; set; } = null!;
+    
     }
 
     public class ChangePasswordModel
