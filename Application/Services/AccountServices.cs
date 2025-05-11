@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Saba.Application.Extensions;
 using Saba.Application.Helpers;
 using Saba.Domain.ViewModels;
+using Saba.Repository;
 
-namespace Saba.Repository;
+namespace Saba.Application.Services;
 
 public interface IAccountService
 {
@@ -53,6 +54,10 @@ public class AccountService : IAccountService
         {
                 return (false, null,  "Invalid username or password.");
         }
+
+        user.LastLoginDate = DateTime.UtcNow;
+        _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync();
 
         var userModel = new UserModel
         {

@@ -3,7 +3,7 @@ namespace Saba.Infrastructure.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Saba.Domain.ViewModels;
-using Saba.Repository;
+using Saba.Application.Services;
 
 [Route("api/[controller]")]
 [ApiController]

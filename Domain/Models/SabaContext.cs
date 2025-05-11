@@ -15,6 +15,10 @@ public partial class SabaContext : DbContext
     {
     }
 
+    public virtual DbSet<Filial> Filials { get; set; }
+
+    public virtual DbSet<FilialUser> FilialUsers { get; set; }
+
     public virtual DbSet<Resource> Resources { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -23,16 +27,43 @@ public partial class SabaContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
-        if (!optionsBuilder.IsConfigured)
-        {
-            #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-            optionsBuilder.UseSqlServer("Server=SQL8020.site4now.net;Database=db_aad223_saba;User Id=db_aad223_saba_admin;Password=saba12345;");
-        }
-    }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=SQL8020.site4now.net;Database=db_aad223_saba;User Id=db_aad223_saba_admin;Password=saba12345;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Filial>(entity =>
+        {
+            entity.Property(e => e.Address)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Lat)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Lng)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<FilialUser>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.HasOne(d => d.Filial).WithMany()
+                .HasForeignKey(d => d.FilialId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FilialUsers_Filials");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FilialUsers_Users");
+        });
+
         modelBuilder.Entity<Resource>(entity =>
         {
             entity.HasKey(e => e.ResourceKey);

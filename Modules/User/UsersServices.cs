@@ -1,27 +1,27 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Saba.Application.Extensions;
 using Saba.Application.Helpers;
 using Saba.Domain.Models;
 using Saba.Domain.ViewModels;
+using Saba.Repository;
 
-namespace Saba.Repository;
+namespace Saba.Application.Services;
 
 public interface IUsersServices
 {
-    Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Add(UserRequestModel m);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> Add(UserRequestModel m);
 
-    Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Update(UserRequestModel m);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> Update(UserRequestModel m);
 
-    Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Disable(string userName);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> Disable(int id);
 
-    Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Enable(string userName);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> Enable(int id);
 
-    Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> GetByUserName(string userName);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> GetById(int id);
 
-    Task<(bool Success, List<UserRequestModel>? Users, string? ErrorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, UserResponseModel? user, string? errorMsg)> GetByUserName(string userName);
+
+    Task<(bool success, IEnumerable<UserResponseModel>? users, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class UsersServices : IUsersServices
@@ -35,7 +35,23 @@ public class UsersServices : IUsersServices
         _userRepository = userRepository;
     }
 
-    public async Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Add(UserRequestModel m)
+    private UserResponseModel MapToUserResponseModel(User user)
+    {
+        return new UserResponseModel
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            RoleId = user.RoleId,
+            Name = user.Name,
+            LastName = user.LastName,
+            Email = user.Email,
+            IsActive = user.IsActive,
+            CreateDate = user.CreateDate,
+            LastLoginDate = user.LastLoginDate,
+        };
+    }
+
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Add(UserRequestModel m)
     {
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var pwdResult = CryptoHelper.ComputePassword(password);
@@ -59,41 +75,41 @@ public class UsersServices : IUsersServices
         };
 
         await _userRepository.AddAsync(newUser);
-        _userRepository.SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
 
-        return (true, m, null);
+        return (true, null, null);
 
     }
 
-    public async Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Disable(string userName)
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Disable(int id)
     {
-        var user = await _userRepository.Get(x => x.UserName == userName);
+        var user = await _userRepository.Get(x => x.Id == id);
         if (user == null)
             return (false, null, "User not found");
 
         user.IsActive = false;
 
         _userRepository.Update(user);
-        _userRepository.SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
 
         return (true, null, null);
     }
 
-    public async Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Enable(string userName)
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Enable(int id)    
     {
-        var user = await _userRepository.Get(x => x.UserName == userName);
+        var user = await _userRepository.Get(x => x.Id == id);
         if (user == null)
             return (false, null, "User not found");
 
         user.IsActive = true;
 
         _userRepository.Update(user);
-        _userRepository.SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
 
         return (true, null, null);
     }
 
-    public async Task<(bool Success, List<UserRequestModel>? Users, string? ErrorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, IEnumerable<UserResponseModel>? users, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var users = await _userRepository.GetAllAsync(x => x.IsActive == true);
 
@@ -109,63 +125,56 @@ public class UsersServices : IUsersServices
                     users = users.Where(x => x.Email.ToLower().StartsWith(value));
 
                 if (filter.Key == "name")
-                    users = users.Where(x => x.Name.ToLower().StartsWith(value));
+                    users = users.Where(x => x.Name != null && x.Name.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
 
                 if (filter.Key == "lastName")
-                    users = users.Where(x => x.LastName.ToLower().StartsWith(value));
+                    users = users.Where(x => x.LastName != null && x.LastName.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
 
-                if (filter.Key == "roleId"){
+                if (filter.Key == "roleId")
                     if (int.TryParse(value, out var roleId))
-                        users = users.Where(x => x.RoleId == roleId);
-                }
+                        users = users.Where(x => x.RoleId == roleId);                
 
-                if (filter.Key == "isActive")
-                {
+                if (filter.Key == "isActive")                
                     if (bool.TryParse(value, out var isActive))
                         users = users.Where(x => x.IsActive == isActive);
-                }
+                
 
             }
         }
 
         if (page > 0 && pageSize > 0)
-        {
             users = users.Skip(page).Take(pageSize);
-        }
 
-        var userModels = users.Select(x => new UserRequestModel
-        {
-            UserName = x.UserName,
-            RoleId = x.RoleId,
-            Name = x.Name,
-            LastName = x.LastName,
-            Email = x.Email,
-            IsActive = x.IsActive
-        }).ToList();
+        var userModels = users.ToArray()
+        .Select(x => MapToUserResponseModel(x)).ToArray();
 
         return (true, userModels, null);
     }
 
-    public async Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> GetByUserName(string userName)
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> GetByUserName(string userName)
     {
         var user = await _userRepository.Get(x => x.UserName == userName);
         if (user == null)
             return (false, null, "User not found");
 
-        var userModel = new UserRequestModel
-        {
-            UserName = user.UserName,
-            RoleId = user.RoleId,
-            Name = user.Name,
-            LastName = user.LastName,
-            Email = user.Email,
-            IsActive = user.IsActive
-        };
+        var userModel = MapToUserResponseModel(user);
+        
+        return (true, userModel, null);
+
+    }
+
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> GetById(int id)
+    {
+        var user = await _userRepository.Get(x => x.Id == id);
+        if (user == null)
+            return (false, null, "User not found");
+
+        var userModel = MapToUserResponseModel(user);
 
         return (true, userModel, null);
     }
 
-    public async Task<(bool Success, UserRequestModel? User, string? ErrorMsg)> Update(UserRequestModel m)
+    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Update(UserRequestModel m)
     {
         var user = await _userRepository.Get(x => x.UserName == m.UserName);
         if (user == null)
@@ -178,8 +187,10 @@ public class UsersServices : IUsersServices
         user.IsActive = m.IsActive;
 
         _userRepository.Update(user);
-        _userRepository.SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
 
-        return (true, m, null);
+        var userModel = MapToUserResponseModel(user);
+
+        return (true, userModel, null);
     }
 }

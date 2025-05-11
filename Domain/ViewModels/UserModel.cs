@@ -5,6 +5,8 @@ namespace Saba.Domain.ViewModels;
 
 public partial class UserRequestModel
 {
+    public int Id { get; set; }
+
     public string UserName { get; set; } = null!;
 
     public int RoleId { get; set; }
@@ -18,3 +20,11 @@ public partial class UserRequestModel
     public bool IsActive { get; set; }
 
 }
+
+public partial class UserResponseModel:UserRequestModel
+{
+    public DateTime CreateDate { get; set; }
+    public DateTime LastLoginDate { get; set; }
+
+}
+
