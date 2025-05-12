@@ -15,6 +15,8 @@ public partial class SabaContext : DbContext
     {
     }
 
+    public virtual DbSet<Client> Clients { get; set; }
+
     public virtual DbSet<Filial> Filials { get; set; }
 
     public virtual DbSet<FilialUser> FilialUsers { get; set; }
@@ -33,6 +35,20 @@ public partial class SabaContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.Property(e => e.Address)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Amount).HasColumnType("money");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.DateAdded).HasColumnType("datetime");
+            entity.Property(e => e.EditedAt).HasColumnType("datetime");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Filial>(entity =>
         {
             entity.Property(e => e.Address)
@@ -90,6 +106,7 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
+            entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.Description)
                 .HasMaxLength(200)
                 .IsUnicode(false);

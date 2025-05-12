@@ -75,7 +75,6 @@ public class AccountService : IAccountService
 
         var token = AuthenticateUser(userReponse);
         userReponse.Token = token.Token;
-        //userReponse.Expires = token.Expires;
 
         return (true, userReponse, null);
     }

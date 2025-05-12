@@ -15,6 +15,7 @@ namespace Saba.Domain.ViewModels
     }
 
     public class UserModel{
+        public int Id { get; set; }
         public string Role { get; set; } = null!;
         public int RoleId { get; set; }
         public string UserName { get; set; } = null!;

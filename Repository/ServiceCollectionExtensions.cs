@@ -14,6 +14,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFilialsServices, FilialsServices>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<ICatalogsServices, CatalogsServices>();
+        services.AddScoped<IClientRepository, ClientRepository>();
+        services.AddScoped<IClientsServices, ClientsServices>();
 
         return services;
     }

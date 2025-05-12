@@ -25,6 +25,6 @@ public class AccountController : ControllerBase
         if (!result.Success)
             return BadRequest(new { message = result.ErrorMsg });
 
-        return new JsonResult(result.User);
+        return Ok(result.User);
     }
 }

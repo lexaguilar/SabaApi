@@ -22,9 +22,9 @@ public class UsersController : ControllerBase
     {
         var (success, users, errorMsg) = await _usersServices.GetAll(skip, take, filters);
         if (!success)
-            return new JsonResult(Array.Empty<UserResponseModel>());
+            return Ok(Array.Empty<UserResponseModel>());
 
-        return new JsonResult(new {
+        return Ok(new {
             items = users,
             totalCount = users?.Count() ?? 0
         });
@@ -37,7 +37,7 @@ public class UsersController : ControllerBase
         if (!success)
             return NotFound(new { message = errorMsg });
 
-        return new JsonResult(user);
+        return Ok(user);
     }
 
     [HttpPost]
@@ -47,7 +47,7 @@ public class UsersController : ControllerBase
         if (!success)
             return BadRequest(new { message = errorMsg });
 
-        return new JsonResult(user);
+        return Ok(user);
     }
     
 
@@ -61,7 +61,7 @@ public class UsersController : ControllerBase
         if (!success)
             return BadRequest(new { message = errorMsg });
 
-        return new JsonResult(user);
+        return Ok(user);
     }
 
     [HttpGet("{id}/disable")]
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
     {
 
         await _usersServices.Disable(id);
-        return new JsonResult(new { message = "Filial disabled." });
+        return Ok(new { message = "User disabled." });
 
     }
 
@@ -78,7 +78,7 @@ public class UsersController : ControllerBase
     {
 
         await _usersServices.Enable(id);
-        return new JsonResult(new { message = "Filial disabled." });
+        return Ok(new { message = "User enabled." });
 
     }
 }

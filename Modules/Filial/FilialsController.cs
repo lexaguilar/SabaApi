@@ -22,9 +22,9 @@ public class FilialsController : ControllerBase
     {
         var result = await _filialsServices.GetAll(skip, take, filters);
         if (!result.success)
-            return NotFound(new { message = "No filials found." });
+            return Ok(Array.Empty<FilialRequestModel>());
 
-        return new JsonResult(new {
+        return Ok(new {
             items = result.filials,
             totalCount = result.filials?.Count() ?? 0
         });
@@ -37,7 +37,7 @@ public class FilialsController : ControllerBase
         if (!result.success)
             return NotFound(new { message = "Filial not found." });
 
-        return new JsonResult(result.filial);
+        return Ok(result.filial);
     }
 
     [HttpPost]
@@ -47,7 +47,7 @@ public class FilialsController : ControllerBase
         if (!result.success)
             return BadRequest(new { message = result.errorMsg });
 
-        return new JsonResult(result.filial);
+        return Ok(result.filial);
     }
 
     [HttpPost("{id}")]
@@ -60,7 +60,7 @@ public class FilialsController : ControllerBase
         if (!result.success)
             return NotFound(new { message = result.errorMsg });
 
-        return new JsonResult(result.filial);
+        return Ok(result.filial);
     }
 
     [HttpGet("{id}/disable")]
@@ -68,7 +68,7 @@ public class FilialsController : ControllerBase
     {
 
         await _filialsServices.Disable(id);
-        return new JsonResult(new { message = "Filial disabled." });
+        return Ok(new { message = "Filial disabled." });
 
     }
 
@@ -77,7 +77,7 @@ public class FilialsController : ControllerBase
     {
 
         await _filialsServices.Enable(id);
-        return new JsonResult(new { message = "Filial disabled." });
+        return Ok(new { message = "Filial enabled." });
 
     }
 }

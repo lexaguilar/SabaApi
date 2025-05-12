@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Saba.Domain.Models;
 
@@ -8,8 +9,8 @@ namespace Saba.Repository;
 
 public interface IUserRepository 
 {
-    Task<User> Get(Func<User, bool> predicate);
-    Task<IQueryable<User>> GetAllAsync(Func<User, bool> predicate = null);
+    Task<User> Get(Expression<Func<User, bool>> predicate);
+    Task<IQueryable<User>> GetAllAsync(Expression<Func<User, bool>>? predicate = null);
     Task AddAsync(User user);
     User Update(User user);
     Task<int> SaveChangesAsync();
@@ -28,16 +29,16 @@ public class UserRepository : IUserRepository
         await _context.Users.AddAsync(user);
     }
 
-    public async Task<IQueryable<User>> GetAllAsync(Func<User, bool> predicate = null)
+    public async Task<IQueryable<User>> GetAllAsync(Expression<Func<User, bool>>? predicate = null)
     {
         if (predicate == null)
-            return _context.Users.AsQueryable();
+            return _context.Users.Include(x => x.Role).AsQueryable();
 
-        return _context.Users.Where(predicate).AsQueryable();
+        return _context.Users.Include(x => x.Role).Where(predicate).AsQueryable();
 
     }
 
-    public Task<User> Get(Func<User, bool> predicate)
+    public Task<User> Get(Expression<Func<User, bool>> predicate)
     {
         var user = _context.Users.Include(x => x.Role).Where(predicate).FirstOrDefault();
 

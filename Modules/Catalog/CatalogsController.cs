@@ -22,6 +22,6 @@ public class CatalogsController : ControllerBase
     {
         var result =_catalogsServices.GetAll(name);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 }

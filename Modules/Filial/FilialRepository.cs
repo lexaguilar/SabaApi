@@ -1,12 +1,13 @@
+using System.Linq.Expressions;
 using Saba.Domain.Models;
 
 namespace Saba.Repository;
 
 public interface IFilialRepository
 {
-    Task<IQueryable<Filial>> GetAllAsync(Func<Filial, bool> predicate = null);
+    Task<IQueryable<Filial>> GetAllAsync(Expression<Func<Filial, bool>>? predicate = null);
 
-    Task<Filial?> GetAsync(Func<Filial, bool> predicate);
+    Task<Filial?> GetAsync(Expression<Func<Filial, bool>> predicate);
 
     Task AddAsync(Filial filial);
 
@@ -24,7 +25,7 @@ public class FilialRepository : IFilialRepository
         _context = context;
     }
 
-    public async Task<IQueryable<Filial>> GetAllAsync(Func<Filial, bool> predicate = null)
+    public async Task<IQueryable<Filial>> GetAllAsync(Expression<Func<Filial, bool>>? predicate = null)
     {
         if (predicate == null)
             return _context.Filials.AsQueryable();
@@ -33,7 +34,7 @@ public class FilialRepository : IFilialRepository
 
     }
 
-    public Task<Filial> GetAsync(Func<Filial, bool> predicate)
+    public Task<Filial> GetAsync(Expression<Func<Filial, bool>> predicate)
     {
         var filial = _context.Filials.Where(predicate).FirstOrDefault();
 
