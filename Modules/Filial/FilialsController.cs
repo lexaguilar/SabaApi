@@ -20,55 +20,56 @@ public class FilialsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        var result = await _filialsServices.GetAll(skip, take, filters);
-        if (!result.success)
+        var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
+        if (!success)
             return Ok(Array.Empty<FilialRequestModel>());
 
         return Ok(new {
-            items = result.filials,
-            totalCount = result.filials?.Count() ?? 0
+            items = filials,
+            totalCount = filials?.Count() ?? 0
         });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var result = await _filialsServices.GetById(id);
-        if (!result.success)
-            return NotFound(new { message = "Filial not found." });
+        var (success, filial, message) = await _filialsServices.GetById(id);
+        if (!success)
+            return NotFound(new { message });
 
-        return Ok(result.filial);
+        return Ok(filial);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] FilialRequestModel filialRequestModel)
     {
-        var result = await _filialsServices.Add(filialRequestModel);
-        if (!result.success)
-            return BadRequest(new { message = result.errorMsg });
+        var (success, filial, message) = await _filialsServices.Add(filialRequestModel);
+        if (!success)
+            return BadRequest(new { message });
 
-        return Ok(result.filial);
+        return Ok(filial);
     }
 
     [HttpPost("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] FilialRequestModel filial)
+    public async Task<IActionResult> Update(int id, [FromBody] FilialRequestModel filialRequestModel)
     {
-        if (id != filial.Id)
+        if (id != filialRequestModel.Id)
             return BadRequest(new { message = "Filial ID mismatch." });
 
-        var result = await _filialsServices.Update(filial);
-        if (!result.success)
-            return NotFound(new { message = result.errorMsg });
+        var (success, filial, message) = await _filialsServices.Update(filialRequestModel);
+        if (!success)
+            return BadRequest(new { message });
 
-        return Ok(result.filial);
+        return Ok(filial);
     }
 
     [HttpGet("{id}/disable")]
     public async Task<IActionResult> Disable(int id)
     {
 
-        await _filialsServices.Disable(id);
-        return Ok(new { message = "Filial disabled." });
+        var (success, role, message) = await _filialsServices.Disable(id);
+        if (!success) return BadRequest(new { message });
+        return Ok(role);
 
     }
 
@@ -76,8 +77,9 @@ public class FilialsController : ControllerBase
     public async Task<IActionResult> Enable(int id)
     {
 
-        await _filialsServices.Enable(id);
-        return Ok(new { message = "Filial enabled." });
+        var (success, role, message) = await _filialsServices.Enable(id);
+        if (!success) return BadRequest(message);
+        return Ok(role);
 
     }
 }

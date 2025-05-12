@@ -9,19 +9,19 @@ namespace Saba.Application.Services;
 
 public interface IUsersServices
 {
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> Add(UserRequestModel m);
+    Task<(bool success, UserResponseModel? user, string? message)> Add(UserRequestModel m);
 
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> Update(UserRequestModel m);
+    Task<(bool success, UserResponseModel? user, string? message)> Update(UserRequestModel m);
 
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> Disable(int id);
+    Task<(bool success, UserResponseModel? user, string? message)> Disable(int id);
 
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> Enable(int id);
+    Task<(bool success, UserResponseModel? user, string? message)> Enable(int id);
 
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> GetById(int id);
+    Task<(bool success, UserResponseModel? user, string? message)> GetById(int id);
 
-    Task<(bool success, UserResponseModel? user, string? errorMsg)> GetByUserName(string userName);
+    Task<(bool success, UserResponseModel? user, string? message)> GetByUserName(string userName);
 
-    Task<(bool success, IEnumerable<UserResponseModel>? users, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, IEnumerable<UserResponseModel>? users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class UsersServices : IUsersServices
@@ -51,7 +51,7 @@ public class UsersServices : IUsersServices
         };
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Add(UserRequestModel m)
+    public async Task<(bool success, UserResponseModel? user, string? message)> Add(UserRequestModel m)
     {
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var pwdResult = CryptoHelper.ComputePassword(password);
@@ -81,7 +81,7 @@ public class UsersServices : IUsersServices
 
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Disable(int id)
+    public async Task<(bool success, UserResponseModel? user, string? message)> Disable(int id)
     {
         var user = await _userRepository.Get(x => x.Id == id);
         if (user == null)
@@ -95,7 +95,7 @@ public class UsersServices : IUsersServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Enable(int id)    
+    public async Task<(bool success, UserResponseModel? user, string? message)> Enable(int id)    
     {
         var user = await _userRepository.Get(x => x.Id == id);
         if (user == null)
@@ -109,7 +109,7 @@ public class UsersServices : IUsersServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, IEnumerable<UserResponseModel>? users, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, IEnumerable<UserResponseModel>? users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var users = await _userRepository.GetAllAsync(x => x.IsActive == true);
 
@@ -151,7 +151,7 @@ public class UsersServices : IUsersServices
         return (true, userModels, null);
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> GetByUserName(string userName)
+    public async Task<(bool success, UserResponseModel? user, string? message)> GetByUserName(string userName)
     {
         var user = await _userRepository.Get(x => x.UserName == userName);
         if (user == null)
@@ -163,7 +163,7 @@ public class UsersServices : IUsersServices
 
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> GetById(int id)
+    public async Task<(bool success, UserResponseModel? user, string? message)> GetById(int id)
     {
         var user = await _userRepository.Get(x => x.Id == id);
         if (user == null)
@@ -174,7 +174,7 @@ public class UsersServices : IUsersServices
         return (true, userModel, null);
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? errorMsg)> Update(UserRequestModel m)
+    public async Task<(bool success, UserResponseModel? user, string? message)> Update(UserRequestModel m)
     {
         var user = await _userRepository.Get(x => x.UserName == m.UserName);
         if (user == null)

@@ -8,19 +8,19 @@ namespace Saba.Application.Services;
 
 public interface IFilialsServices
 {
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Add(FilialRequestModel m);
+    Task<(bool success, FilialRequestModel? filial, string? message)> Add(FilialRequestModel m);
 
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Update(FilialRequestModel m);
+    Task<(bool success, FilialRequestModel? filial, string? message)> Update(FilialRequestModel m);
 
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Disable(int id);
+    Task<(bool success, FilialRequestModel? filial, string? message)> Disable(int id);
 
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Enable(int id);
+    Task<(bool success, FilialRequestModel? filial, string? message)> Enable(int id);
 
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> GetByUserName(string userName);
+    Task<(bool success, FilialRequestModel? filial, string? message)> GetByUserName(string userName);
 
-    Task<(bool success, FilialRequestModel? filial, string? errorMsg)> GetById(int id);
+    Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id);
 
-    Task<(bool success, List<FilialRequestModel>? filials, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, List<FilialRequestModel>? filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class FilialsServices : IFilialsServices
@@ -34,7 +34,7 @@ public class FilialsServices : IFilialsServices
         _filialRepository = filialRepository;
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Add(FilialRequestModel m)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> Add(FilialRequestModel m)
     {
         var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name);
         if (existingFilial != null)        
@@ -55,7 +55,7 @@ public class FilialsServices : IFilialsServices
         return (true, m, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Update(FilialRequestModel m)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> Update(FilialRequestModel m)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == m.Id);
 
@@ -76,7 +76,7 @@ public class FilialsServices : IFilialsServices
         return (true, m, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Disable(int id)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> Disable(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 
@@ -93,7 +93,7 @@ public class FilialsServices : IFilialsServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> Enable(int id)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> Enable(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 
@@ -110,7 +110,7 @@ public class FilialsServices : IFilialsServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> GetByUserName(string userName)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> GetByUserName(string userName)
     {
         var filial = await _filialRepository.GetAsync(x => x.Name == userName);
 
@@ -132,7 +132,7 @@ public class FilialsServices : IFilialsServices
         return (true, filialModel, null);
     }
 
-    public async Task<(bool success, List<FilialRequestModel>? filials, string? errorMsg)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, List<FilialRequestModel>? filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var filials = await _filialRepository.GetAllAsync();
 
@@ -180,7 +180,7 @@ public class FilialsServices : IFilialsServices
         return (true, filialModels, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? errorMsg)> GetById(int id)
+    public async Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 

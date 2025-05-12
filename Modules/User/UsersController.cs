@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        var (success, users, errorMsg) = await _usersServices.GetAll(skip, take, filters);
+        var (success, users, message) = await _usersServices.GetAll(skip, take, filters);
         if (!success)
             return Ok(Array.Empty<UserResponseModel>());
 
@@ -33,9 +33,9 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var (success, user, errorMsg) = await _usersServices.GetById(id);
+        var (success, user, message) = await _usersServices.GetById(id);
         if (!success)
-            return NotFound(new { message = errorMsg });
+            return NotFound(new { message });
 
         return Ok(user);
     }
@@ -43,9 +43,9 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] UserRequestModel userRequestModel)
     {
-        var (success, user, errorMsg) = await _usersServices.Add(userRequestModel);
+        var (success, user, message) = await _usersServices.Add(userRequestModel);
         if (!success)
-            return BadRequest(new { message = errorMsg });
+            return BadRequest(new { message });
 
         return Ok(user);
     }
@@ -57,9 +57,9 @@ public class UsersController : ControllerBase
         if (id != userRequestModel.Id)
             return BadRequest(new { message = "User ID mismatch." });
 
-        var (success, user, errorMsg) = await _usersServices.Update(userRequestModel);
+        var (success, user, message) = await _usersServices.Update(userRequestModel);
         if (!success)
-            return BadRequest(new { message = errorMsg });
+            return BadRequest(new { message });
 
         return Ok(user);
     }
@@ -68,8 +68,9 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Disable(int id)
     {
 
-        await _usersServices.Disable(id);
-        return Ok(new { message = "User disabled." });
+        var (success, user, message) = await _usersServices.Disable(id);
+        if (!success) return BadRequest(new { message });
+        return Ok(user);
 
     }
 
@@ -77,8 +78,9 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Enable(int id)
     {
 
-        await _usersServices.Enable(id);
-        return Ok(new { message = "User enabled." });
+        var (success, user, message) = await _usersServices.Enable(id);
+        if (!success) return BadRequest(new { message });
+        return Ok(user);
 
     }
 }

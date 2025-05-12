@@ -12,6 +12,13 @@ public partial class Role
     public string? Description { get; set; }
 
     public bool Active { get; set; }
+    public DateTime? CreatedAt { get; set; }
+
+    public int? CreatedByUserId { get; set; }
+
+    public DateTime? EditedAt { get; set; }
+
+    public int? EditedByUserId { get; set; }
 
     public virtual ICollection<RoleResource> RoleResources { get; set; } = new List<RoleResource>();
 
