@@ -13,17 +13,15 @@ public interface IRolesServices
     Task<(bool success, RoleResponseModel? role, string? message)> Disable(int id);
     Task<(bool success, RoleResponseModel? role, string? message)> Enable(int id);
     Task<(bool success, RoleResponseModel? role, string? message)> GetById(int id);
-    Task<(bool success, IEnumerable<RoleResponseModel>? roles, string? message)> GetAll(int page, int pageSize, Dictionary<string, string>? filters = null);
+    Task<(bool success, RolePageResponseModel roles, string? message)> GetAll(int page, int pageSize, Dictionary<string, string>? filters = null);
 }
 
 public class RolesServices : IRolesServices
 {
     private readonly IRoleRepository _roleRepository;
-    private readonly AppSettings _appSettings;
 
-    public RolesServices(IRoleRepository roleRepository, IOptions<AppSettings> appSettings)
+    public RolesServices(IRoleRepository roleRepository)
     {
-        _appSettings = appSettings.Value;
         _roleRepository = roleRepository;
     }
 
@@ -101,7 +99,7 @@ public class RolesServices : IRolesServices
         return (true, MapToRoleResponseModel(role), null);
     }
 
-    public async Task<(bool success, IEnumerable<RoleResponseModel>? roles, string? message)> GetAll(int page, int pageSize, Dictionary<string, string>? filters = null)
+    public async Task<(bool success, RolePageResponseModel roles, string? message)> GetAll(int page, int pageSize, Dictionary<string, string>? filters = null)
     {
         var roles = await _roleRepository.GetAllAsync();
 
@@ -120,10 +118,16 @@ public class RolesServices : IRolesServices
             }
         }
 
-        if (page > 0 && pageSize > 0)
-            roles = roles.Skip(page).Take(pageSize);
+        var totalCount = roles.Count();
+        roles = roles.Skip(page).Take(pageSize);
+       
+        var rolePageResponseModel = new RolePageResponseModel
+        {
+            TotalCount = totalCount,
+            Items = roles.ToArray().Select(MapToRoleResponseModel)
+        };
+        return (true, rolePageResponseModel, null);
 
-        return (true, roles.ToArray().Select(MapToRoleResponseModel), null);
     }
 
     public async Task<(bool success, RoleResponseModel? role, string? message)> GetById(int id)

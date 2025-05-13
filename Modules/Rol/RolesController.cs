@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Saba.Application.Extensions;
 using Saba.Application.Services;
 using Saba.Domain.ViewModels;
 
@@ -24,8 +25,8 @@ public class RolesController : ControllerBase
         if (!success) return Ok(Array.Empty<FilialRequestModel>());
 
          return Ok(new {
-            items = roles,
-            totalCount = roles?.Count() ?? 0
+            items = roles.Items,
+            totalCount = roles.TotalCount 
         });
     }
 
@@ -45,15 +46,19 @@ public class RolesController : ControllerBase
         return Ok(role);
     }
 
-    [HttpPost]
+    [HttpPost("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] RoleRequestModel model)
     {
+        var user = this.GetUser();
+        
+        model.UserId = user.Id;
+        
         var (success, role, message) = await _rolesServices.Update(model);
         if (!success) return BadRequest(new { message });
         return Ok(role);
     }
 
-    [HttpPut("{id}/disable")]
+    [HttpGet("{id}/disable")]
     public async Task<IActionResult> Disable(int id)
     {
         var (success, role, message) = await _rolesServices.Disable(id);
@@ -61,7 +66,7 @@ public class RolesController : ControllerBase
         return Ok(role);
     }
 
-    [HttpPut("{id}/enable")]
+    [HttpGet("{id}/enable")]
     public async Task<IActionResult> Enable(int id)
     {
         var (success, role, message) = await _rolesServices.Enable(id);

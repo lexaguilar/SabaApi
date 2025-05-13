@@ -28,3 +28,8 @@ public partial class UserResponseModel:UserRequestModel
 
 }
 
+public partial class UserPageResponseModel
+{
+    public int TotalCount { get; set; }
+    public IEnumerable<UserResponseModel> Items { get; set; } = null!;
+}

@@ -25,8 +25,8 @@ public class FilialsController : ControllerBase
             return Ok(Array.Empty<FilialRequestModel>());
 
         return Ok(new {
-            items = filials,
-            totalCount = filials?.Count() ?? 0
+            items = filials.Items,
+            totalCount = filials.TotalCount
         });
     }
 

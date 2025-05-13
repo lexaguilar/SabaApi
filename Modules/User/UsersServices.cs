@@ -21,7 +21,7 @@ public interface IUsersServices
 
     Task<(bool success, UserResponseModel? user, string? message)> GetByUserName(string userName);
 
-    Task<(bool success, IEnumerable<UserResponseModel>? users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, UserPageResponseModel users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class UsersServices : IUsersServices
@@ -109,7 +109,7 @@ public class UsersServices : IUsersServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, IEnumerable<UserResponseModel>? users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, UserPageResponseModel users, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var users = await _userRepository.GetAllAsync(x => x.IsActive == true);
 
@@ -142,13 +142,20 @@ public class UsersServices : IUsersServices
             }
         }
 
-        if (page > 0 && pageSize > 0)
-            users = users.Skip(page).Take(pageSize);
+        var totalCount = users.Count();       
+
+        users = users.Skip(page).Take(pageSize);
 
         var userModels = users.ToArray()
-        .Select(x => MapToUserResponseModel(x)).ToArray();
+        .Select(x => MapToUserResponseModel(x));
 
-        return (true, userModels, null);
+        var userPageResponseModel = new UserPageResponseModel
+        {
+            TotalCount = totalCount,
+            Items = userModels
+        };
+
+        return (true, userPageResponseModel, null);
     }
 
     public async Task<(bool success, UserResponseModel? user, string? message)> GetByUserName(string userName)

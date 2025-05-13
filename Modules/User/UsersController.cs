@@ -25,8 +25,8 @@ public class UsersController : ControllerBase
             return Ok(Array.Empty<UserResponseModel>());
 
         return Ok(new {
-            items = users,
-            totalCount = users?.Count() ?? 0
+            items = users.Items,
+            totalCount = users.TotalCount
         });
     }
 

@@ -20,7 +20,7 @@ public interface IFilialsServices
 
     Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id);
 
-    Task<(bool success, List<FilialRequestModel>? filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, FilialPageResponseModel filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class FilialsServices : IFilialsServices
@@ -34,15 +34,34 @@ public class FilialsServices : IFilialsServices
         _filialRepository = filialRepository;
     }
 
+    private FilialRequestModel MapToFilialRequestModel(Filial filial)
+    {
+        return new FilialRequestModel
+        {
+            Id = filial.Id,
+            InternalCode = filial.InternalCode,
+            Name = filial.Name,
+            Address = filial.Address,
+            Lat = filial.Lat,
+            Lng = filial.Lng,
+            Active = filial.Active
+        };
+    }
+
     public async Task<(bool success, FilialRequestModel? filial, string? message)> Add(FilialRequestModel m)
     {
         var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name);
         if (existingFilial != null)        
             return (false, null, "Ya existe una filial con ese nombre.");
 
+        var existingInternalCode = await _filialRepository.GetAsync(x => x.InternalCode == m.InternalCode);
+        if (existingInternalCode != null)        
+            return (false, null, "Ya existe una filial con ese código interno.");
+
         var newFilial = new Filial
         {
             Name = m.Name,
+            InternalCode = m.InternalCode,
             Address = m.Address,
             Lat = m.Lat,
             Lng = m.Lng,
@@ -60,11 +79,20 @@ public class FilialsServices : IFilialsServices
         var filial = await _filialRepository.GetAsync(x => x.Id == m.Id);
 
         if (filial == null)
-        {
             return (false, null, "Filial not found.");
-        }
+
+        var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name && x.Id != m.Id);
+        // Check if another filial with the same name exists, excluding the current one
+        if (existingFilial != null)        
+            return (false, null, "Ya existe una filial con ese nombre.");
+
+        var existingInternalCode = await _filialRepository.GetAsync(x => x.InternalCode == m.InternalCode && x.Id != m.Id);
+        // Check if another filial with the same internal code exists, excluding the current one
+        if (existingInternalCode != null)        
+            return (false, null, "Ya existe una filial con ese código interno.");
 
         filial.Name = m.Name;
+        filial.InternalCode = m.InternalCode;
         filial.Address = m.Address;
         filial.Lat = m.Lat;
         filial.Lng = m.Lng;
@@ -119,20 +147,12 @@ public class FilialsServices : IFilialsServices
             return (false, null, "Filial not found.");
         }
 
-        var filialModel = new FilialRequestModel
-        {
-            Id = filial.Id,
-            Name = filial.Name,
-            Address = filial.Address,
-            Lat = filial.Lat,
-            Lng = filial.Lng,
-            Active = filial.Active
-        };
+        var filialModel = MapToFilialRequestModel(filial);
 
         return (true, filialModel, null);
     }
 
-    public async Task<(bool success, List<FilialRequestModel>? filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, FilialPageResponseModel filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var filials = await _filialRepository.GetAllAsync();
 
@@ -161,23 +181,18 @@ public class FilialsServices : IFilialsServices
 
             }
         }
+        var totalCount = filials.Count();
+        filials = filials.Skip(page).Take(pageSize);
 
-        if (page > 0 && pageSize > 0)
+        var filialModels = filials.ToArray().Select(x => MapToFilialRequestModel(x));
+
+        var filialPageResponseModel = new FilialPageResponseModel
         {
-            filials = filials.Skip(page).Take(pageSize);
-        }
+            Items = filialModels,
+            TotalCount = totalCount
+        };
 
-        var filialModels = filials.Select(x => new FilialRequestModel
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Address = x.Address,
-            Lat = x.Lat,
-            Lng = x.Lng,
-            Active = x.Active
-        }).ToList();
-
-        return (true, filialModels, null);
+        return (true, filialPageResponseModel, null);
     }
 
     public async Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id)
@@ -189,15 +204,7 @@ public class FilialsServices : IFilialsServices
             return (false, null, "Filial not found.");
         }
 
-        var filialModel = new FilialRequestModel
-        {
-            Id = filial.Id,
-            Name = filial.Name,
-            Address = filial.Address,
-            Lat = filial.Lat,
-            Lng = filial.Lng,
-            Active = filial.Active
-        };
+        var filialModel = MapToFilialRequestModel(filial);
 
         return (true, filialModel, null);
     }

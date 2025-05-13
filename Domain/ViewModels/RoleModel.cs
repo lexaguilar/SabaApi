@@ -16,3 +16,8 @@ public class RoleResponseModel : RoleRequestModel
     public DateTime? EditedAt { get; set; }
     public int? EditedByUserId { get; set; }
 }
+
+public class RolePageResponseModel {
+    public int TotalCount { get; set; }
+    public IEnumerable<RoleResponseModel> Items { get; set; }
+}
