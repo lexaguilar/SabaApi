@@ -48,6 +48,7 @@ public class AccountService : IAccountService
         var (passwordHash, salt) = CryptoHelper.ComputePassword(m.NewPassword);
         user.Password = passwordHash;
         user.PasswordSalt = salt;
+        user.LastPasswordChangedDate = DateTime.UtcNow;
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync();
 
@@ -65,13 +66,14 @@ public class AccountService : IAccountService
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var (passwordHash, salt) = CryptoHelper.ComputePassword(password);
         
+        user.LastPasswordChangedDate = DateTime.UtcNow;
         user.Password = passwordHash;
         user.PasswordSalt = salt;
       
         _userRepository.Update(user);
         _userRepository.SaveChangesAsync();
 
-         var message = new MimeMessage
+        var message = new MimeMessage
         {               
             To = { new MailboxAddress(user.Name, user.Email) }
         };
