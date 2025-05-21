@@ -20,7 +20,7 @@ namespace Saba.Application.Helpers
             }
         }
 
-        public static (string PasswordHash, string Salt) ComputePassword(string pwd)
+        public static (string passwordHash, string salt) ComputePassword(string pwd)
         {
             using (var sha = SHA256.Create())
             {

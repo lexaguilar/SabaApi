@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using MimeKit;
 using Saba.Application.Extensions;
 using Saba.Application.Helpers;
 using Saba.Domain.Models;
@@ -27,10 +28,12 @@ public interface IUsersServices
 public class UsersServices : IUsersServices
 {
     private readonly IUserRepository _userRepository;
+    private readonly IMessageService _messageService;
     private readonly AppSettings _appSettings;
 
-    public UsersServices(IUserRepository userRepository, IOptions<AppSettings> appSettings)
+    public UsersServices(IUserRepository userRepository, IOptions<AppSettings> appSettings, IMessageService messageService)
     {
+        _messageService = messageService;
         _appSettings = appSettings.Value;
         _userRepository = userRepository;
     }
@@ -53,8 +56,13 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> Add(UserRequestModel m)
     {
+
+        var existing = await _userRepository.GetAsync(x => x.UserName == m.UserName);
+        if (existing != null)
+            return (false, null, "Ya existe un usuario con ese nombre.");
+
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
-        var pwdResult = CryptoHelper.ComputePassword(password);
+        var (pass, salt) = CryptoHelper.ComputePassword(password);
         var newUser = new User{
             UserName = m.UserName,
             RoleId = m.RoleId,
@@ -62,8 +70,8 @@ public class UsersServices : IUsersServices
             LastName = m.LastName,
             Email = m.Email,
             IsActive = m.IsActive,
-            Password = pwdResult.PasswordHash,
-            PasswordSalt = pwdResult.Salt,
+            Password = pass,
+            PasswordSalt = salt,
             CreateDate = DateTime.UtcNow,
             LastLoginDate = DateTime.UtcNow,
             LastPasswordChangedDate = DateTime.UtcNow,
@@ -76,14 +84,28 @@ public class UsersServices : IUsersServices
 
         await _userRepository.AddAsync(newUser);
         await _userRepository.SaveChangesAsync();
+        
+        var message = new MimeMessage
+        {               
+            To = { new MailboxAddress(m.Name, m.Email) }
+        };
 
-        return (true, null, null);
+        message.Subject = "Bienvenido a Saba";
+        message.Body = new TextPart("html")
+        {
+            Text = $"<h1>Bienvenido a Saba</h1><p>Su usuario es: {m.UserName}</p><p>Su contraseña es: {password}</p>"
+        };
+
+        await _messageService.SendAsync(message);
+
+        var userModel = MapToUserResponseModel(newUser);
+        return (true, userModel, null);
 
     }
 
     public async Task<(bool success, UserResponseModel? user, string? message)> Disable(int id)
     {
-        var user = await _userRepository.Get(x => x.Id == id);
+        var user = await _userRepository.GetAsync(x => x.Id == id);
         if (user == null)
             return (false, null, "User not found");
 
@@ -97,7 +119,7 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> Enable(int id)    
     {
-        var user = await _userRepository.Get(x => x.Id == id);
+        var user = await _userRepository.GetAsync(x => x.Id == id);
         if (user == null)
             return (false, null, "User not found");
 
@@ -160,7 +182,7 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> GetByUserName(string userName)
     {
-        var user = await _userRepository.Get(x => x.UserName == userName);
+        var user = await _userRepository.GetAsync(x => x.UserName == userName);
         if (user == null)
             return (false, null, "User not found");
 
@@ -172,7 +194,7 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> GetById(int id)
     {
-        var user = await _userRepository.Get(x => x.Id == id);
+        var user = await _userRepository.GetAsync(x => x.Id == id);
         if (user == null)
             return (false, null, "User not found");
 
@@ -183,7 +205,7 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> Update(UserRequestModel m)
     {
-        var user = await _userRepository.Get(x => x.UserName == m.UserName);
+        var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
         if (user == null)
             return (false, null, "User not found");
 

@@ -9,7 +9,7 @@ namespace Saba.Repository;
 
 public interface IUserRepository 
 {
-    Task<User> Get(Expression<Func<User, bool>> predicate);
+    Task<User> GetAsync(Expression<Func<User, bool>> predicate);
     Task<IQueryable<User>> GetAllAsync(Expression<Func<User, bool>>? predicate = null);
     Task AddAsync(User user);
     User Update(User user);
@@ -38,7 +38,7 @@ public class UserRepository : IUserRepository
 
     }
 
-    public Task<User> Get(Expression<Func<User, bool>> predicate)
+    public Task<User> GetAsync(Expression<Func<User, bool>> predicate)
     {
         var user = _context.Users.Include(x => x.Role).Where(predicate).FirstOrDefault();
 

@@ -9,6 +9,7 @@ using Saba.Repository;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("AppSettings:SmtpSetting"));
 builder.Services.AddDbContext<SabaContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 builder.Services.AddControllers();
 builder.Services.AddRepositories();

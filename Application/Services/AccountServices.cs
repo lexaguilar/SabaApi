@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using Saba.Application.Extensions;
 using Saba.Application.Helpers;
 using Saba.Domain.ViewModels;
@@ -11,44 +13,85 @@ namespace Saba.Application.Services;
 
 public interface IAccountService
 {
-    Task<(bool Success, LoginModelReponse? User, string? ErrorMsg)> Login(LoginModel m);
+    Task<(bool success, LoginModelReponse? User, string? message)> Login(LoginModel m);
 
-    string ForgotPassword(string email);
+    Task<(bool success, string message)> ResetPassword(string email);
 
-    (bool Success, string Email) ForgotPasswordConfirmation(ForgotPasswordConfirmationModel m);
-
-    (bool Success, string ErrorMsg) ChangePassword(ChangePasswordModel m);
+    Task<(bool success, string message)> ChangePassword(ChangePasswordModel m);
 }
 
 public class AccountService : IAccountService
 {
     private readonly IUserRepository _userRepository;
     private readonly AppSettings _appSettings;
+    private readonly IMessageService _messageService;
 
-    public AccountService(IUserRepository userRepository, IOptions<AppSettings> appSettings)
+
+    public AccountService(IUserRepository userRepository, IOptions<AppSettings> appSettings, IMessageService messageService)
     {
+        _messageService = messageService;   
         _appSettings = appSettings.Value;
         _userRepository = userRepository;
     }
 
-    public (bool Success, string ErrorMsg) ChangePassword(ChangePasswordModel m)
+    public async Task<(bool success, string message)> ChangePassword(ChangePasswordModel m)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
+        if (user == null)
+            return (false, "User not found.");
+
+        if (!CryptoHelper.ComparePassword(m.OldPassword, user.Password, user.PasswordSalt))
+            return (false, "La contraseña actual no es correcta.");
+        if (m.NewPassword != m.ConfirmPassword)
+            return (false, "Las contraseñas no coinciden.");
+
+        var (passwordHash, salt) = CryptoHelper.ComputePassword(m.NewPassword);
+        user.Password = passwordHash;
+        user.PasswordSalt = salt;
+        _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync();
+
+        return (true, null);
     }
 
-    public string ForgotPassword(string email)
+    public async Task<(bool success, string message)> ResetPassword(string email)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetAsync(x => x.Email == email);
+        if (user == null)
+           user = await _userRepository.GetAsync(x => x.UserName == email);
+        if (user == null)
+            return (false, "No se encontró el usuario.");
+
+        var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
+        var (passwordHash, salt) = CryptoHelper.ComputePassword(password);
+        
+        user.Password = passwordHash;
+        user.PasswordSalt = salt;
+      
+        _userRepository.Update(user);
+        _userRepository.SaveChangesAsync();
+
+         var message = new MimeMessage
+        {               
+            To = { new MailboxAddress(user.Name, user.Email) }
+        };
+
+        message.Subject = "Saba - Restablecimiento de contraseña";
+        message.Body = new TextPart("html")
+        {
+            Text = $"<h1>Restablecimiento de contraseña</h1><p>Su nueva contraseña es: {password}</p>"
+        };
+
+        // Send email with the token
+        await _messageService.SendAsync(message);
+
+        return (true, null);
     }
 
-    public (bool Success, string Email) ForgotPasswordConfirmation(ForgotPasswordConfirmationModel m)
-    {
-        throw new NotImplementedException();
-    }
 
-    public async Task<(bool Success, LoginModelReponse? User, string ErrorMsg)> Login(LoginModel m)
+    public async Task<(bool success, LoginModelReponse? User, string message)> Login(LoginModel m)
     {
-        var user = await _userRepository.Get(x => x.UserName == m.UserName);
+        var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
 
         if (user == null || !CryptoHelper.ComparePassword(m.Password, user.Password, user.PasswordSalt))
         {
@@ -61,6 +104,7 @@ public class AccountService : IAccountService
 
         var userModel = new UserModel
         {
+            Id = user.Id,
             DisplayName = user.UserName,
             Role = user.Role.Name,
             RoleId = user.RoleId,
