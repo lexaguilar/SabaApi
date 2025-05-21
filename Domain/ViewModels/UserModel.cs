@@ -19,6 +19,8 @@ public partial class UserRequestModel
 
     public bool IsActive { get; set; }
 
+    public int[] FilialIds { get; set; } = null!;
+
 }
 
 public partial class UserResponseModel:UserRequestModel

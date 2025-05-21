@@ -19,8 +19,6 @@ public partial class SabaContext : DbContext
 
     public virtual DbSet<Filial> Filials { get; set; }
 
-    public virtual DbSet<FilialUser> FilialUsers { get; set; }
-
     public virtual DbSet<Resource> Resources { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -54,6 +52,9 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(250)
                 .IsUnicode(false);
+            entity.Property(e => e.InternalCode)
+                .HasMaxLength(10)
+                .IsUnicode(false);
             entity.Property(e => e.Lat)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -63,21 +64,6 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-        });
-
-        modelBuilder.Entity<FilialUser>(entity =>
-        {
-            entity.HasNoKey();
-
-            entity.HasOne(d => d.Filial).WithMany()
-                .HasForeignKey(d => d.FilialId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_FilialUsers_Filials");
-
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_FilialUsers_Users");
         });
 
         modelBuilder.Entity<Resource>(entity =>
@@ -107,9 +93,11 @@ public partial class SabaContext : DbContext
         modelBuilder.Entity<Role>(entity =>
         {
             entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Description)
                 .HasMaxLength(200)
                 .IsUnicode(false);
+            entity.Property(e => e.EditedAt).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(20)
                 .IsUnicode(false);
@@ -134,7 +122,7 @@ public partial class SabaContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_RoleResources_Roles");
         });
-
+        
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Memberships");
@@ -169,6 +157,23 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Users_Roles");
+
+            entity.HasMany(d => d.Filials).WithMany(p => p.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "FilialUser",
+                    r => r.HasOne<Filial>().WithMany()
+                        .HasForeignKey("FilialId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_FilialUsers_Filials"),
+                    l => l.HasOne<User>().WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_FilialUsers_Users"),
+                    j =>
+                    {
+                        j.HasKey("UserId", "FilialId");
+                        j.ToTable("FilialUsers");
+                    });
         });
 
         OnModelCreatingPartial(modelBuilder);

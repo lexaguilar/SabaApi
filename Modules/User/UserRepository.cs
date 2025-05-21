@@ -32,15 +32,18 @@ public class UserRepository : IUserRepository
     public async Task<IQueryable<User>> GetAllAsync(Expression<Func<User, bool>>? predicate = null)
     {
         if (predicate == null)
-            return _context.Users.Include(x => x.Role).AsQueryable();
+            return _context.Users
+            .Include(x => x.Role)
+            .Include(x => x.Filials)
+            .AsQueryable();
 
         return _context.Users.Include(x => x.Role).Where(predicate).AsQueryable();
 
     }
 
-    public Task<User> GetAsync(Expression<Func<User, bool>> predicate)
+    public Task<User?> GetAsync(Expression<Func<User, bool>> predicate)
     {
-        var user = _context.Users.Include(x => x.Role).Where(predicate).FirstOrDefault();
+        var user = _context.Users.Include(x => x.Role).Include(x =>x.Filials).Where(predicate).FirstOrDefault();
 
         return Task.FromResult(user);
     }

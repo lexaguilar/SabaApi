@@ -12,6 +12,7 @@ public partial class Role
     public string? Description { get; set; }
 
     public bool Active { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public int? CreatedByUserId { get; set; }

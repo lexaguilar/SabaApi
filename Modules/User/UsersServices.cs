@@ -28,11 +28,13 @@ public interface IUsersServices
 public class UsersServices : IUsersServices
 {
     private readonly IUserRepository _userRepository;
+    private readonly IFilialRepository _filialRepository;
     private readonly IMessageService _messageService;
     private readonly AppSettings _appSettings;
 
-    public UsersServices(IUserRepository userRepository, IOptions<AppSettings> appSettings, IMessageService messageService)
+    public UsersServices(IUserRepository userRepository, IOptions<AppSettings> appSettings, IMessageService messageService, IFilialRepository filialRepository)
     {
+        _filialRepository = filialRepository;
         _messageService = messageService;
         _appSettings = appSettings.Value;
         _userRepository = userRepository;
@@ -51,6 +53,7 @@ public class UsersServices : IUsersServices
             IsActive = user.IsActive,
             CreateDate = user.CreateDate,
             LastLoginDate = user.LastLoginDate,
+            FilialIds = user.Filials.Select(x => x.Id).ToArray()
         };
     }
 
@@ -81,6 +84,15 @@ public class UsersServices : IUsersServices
             TempToken = null,
             TempTokenExpiration = DateTime.UtcNow,
         };
+
+        if (m.FilialIds != null && m.FilialIds.Length > 0)
+        {
+            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
+            foreach (var filial in filials)
+            {               
+                newUser.Filials.Add(filial);
+            }
+        }
 
         await _userRepository.AddAsync(newUser);
         await _userRepository.SaveChangesAsync();
@@ -214,6 +226,16 @@ public class UsersServices : IUsersServices
         user.LastName = m.LastName;
         user.Email = m.Email;
         user.IsActive = m.IsActive;
+
+        if (m.FilialIds != null && m.FilialIds.Length > 0)
+        {
+            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
+            user.Filials.Clear();
+            foreach (var filial in filials)
+            {              
+                user.Filials.Add(filial);               
+            }
+        }
 
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync();

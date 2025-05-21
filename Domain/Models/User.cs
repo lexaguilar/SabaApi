@@ -40,4 +40,6 @@ public partial class User
     public DateTime TempTokenExpiration { get; set; }
 
     public virtual Role Role { get; set; } = null!;
+
+    public virtual ICollection<Filial> Filials { get; set; } = new List<Filial>();
 }
