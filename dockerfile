@@ -14,7 +14,7 @@ ARG BUILD_VERSION=1.2.3.0
 
 # Build the .NET application
 WORKDIR /source
-RUN dotnet publish -c Release -o /app -p:Version=$BUILD_VERSION -p:FileVersion=$BUILD_VERSION -p:AssemblyVersion=$BUILD_VERSION
+RUN dotnet publish ~/Saba.csproj -c Release -o /app -p:Version=$BUILD_VERSION -p:FileVersion=$BUILD_VERSION -p:AssemblyVersion=$BUILD_VERSION
 
 # Use the official ASP.NET Core runtime image as the runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
