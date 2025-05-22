@@ -97,7 +97,7 @@ public class AccountService : IAccountService
 
         if (user == null || !CryptoHelper.ComparePassword(m.Password, user.Password, user.PasswordSalt))
         {
-                return (false, null,  "Invalid username or password.");
+            return (false, null,  "Invalid username or password.");
         }
 
         user.LastLoginDate = DateTime.UtcNow;
