@@ -48,7 +48,8 @@ jobs:
 
     - name: show registry
       run: |
-        echo ${{ steps.login-ecr.outputs.registry }}
+        echo ${{ steps.login-ecr.outputs.registry }}}/${{ secrets.ECR_REPOSITORY }}:${{ steps.vars.outputs.tag }}
+
 
     - name: Push image to ECR
       run: |
