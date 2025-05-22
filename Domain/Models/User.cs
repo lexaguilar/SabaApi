@@ -41,5 +41,7 @@ public partial class User
 
     public virtual Role Role { get; set; } = null!;
 
+    public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();
+
     public virtual ICollection<Filial> Filials { get; set; } = new List<Filial>();
 }

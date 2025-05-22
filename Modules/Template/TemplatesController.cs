@@ -8,66 +8,66 @@ using Saba.Domain.ViewModels;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class FilialsController : ControllerBase
+public class TemplatesController : ControllerBase
 {
-    private readonly IFilialsServices _filialsServices;
+    private readonly ITemplatesServices _templatesServices;
 
-    public FilialsController(IFilialsServices filialsServices)
+    public TemplatesController(ITemplatesServices templatesServices)
     {
-        _filialsServices = filialsServices;
+        _templatesServices = templatesServices;
     }
 
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
+        var (success, templates, message) = await _templatesServices.GetAll(skip, take, filters);
         if (!success)
             return Ok(Array.Empty<TemplateResponseModel>());
 
         return Ok(new {
-            items = filials.Items,
-            totalCount = filials.TotalCount
+            items = templates.Items,
+            totalCount = templates.TotalCount
         });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var (success, filial, message) = await _filialsServices.GetById(id);
+        var (success, template, message) = await _templatesServices.GetById(id);
         if (!success)
             return NotFound(new { message });
 
-        return Ok(filial);
+        return Ok(template);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] FilialRequestModel filialRequestModel)
+    public async Task<IActionResult> Create([FromBody] TemplateRequestModel templateRequestModel)
     {
-        var (success, filial, message) = await _filialsServices.Add(filialRequestModel);
+        var (success, template, message) = await _templatesServices.Add(templateRequestModel);
         if (!success)
             return BadRequest(new { message });
 
-        return Ok(filial);
+        return Ok(template);
     }
 
     [HttpPost("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] FilialRequestModel filialRequestModel)
+    public async Task<IActionResult> Update(int id, [FromBody] TemplateRequestModel templateRequestModel)
     {
-        if (id != filialRequestModel.Id)
+        if (id != templateRequestModel.Id)
             return BadRequest(new { message = "Filial ID mismatch." });
 
-        var (success, filial, message) = await _filialsServices.Update(filialRequestModel);
+        var (success, template, message) = await _templatesServices.Update(templateRequestModel);
         if (!success)
             return BadRequest(new { message });
 
-        return Ok(filial);
+        return Ok(template);
     }
 
     [HttpGet("{id}/disable")]
     public async Task<IActionResult> Disable(int id)
     {
 
-        var (success, role, message) = await _filialsServices.Disable(id);
+        var (success, role, message) = await _templatesServices.Disable(id);
         if (!success) return BadRequest(new { message });
         return Ok(role);
 
@@ -77,7 +77,7 @@ public class FilialsController : ControllerBase
     public async Task<IActionResult> Enable(int id)
     {
 
-        var (success, role, message) = await _filialsServices.Enable(id);
+        var (success, role, message) = await _templatesServices.Enable(id);
         if (!success) return BadRequest(message);
         return Ok(role);
 

@@ -3,22 +3,22 @@ using Saba.Application.Helpers;
 using Saba.Domain.Models;
 using Saba.Domain.ViewModels;
 using Saba.Repository;
-
+using Saba.Application.Extensions;
 namespace Saba.Application.Services;
 
 public interface IFilialsServices
 {
-    Task<(bool success, FilialRequestModel? filial, string? message)> Add(FilialRequestModel m);
+    Task<(bool success, FilialResponseModel? filial, string? message)> Add(FilialRequestModel m);
 
-    Task<(bool success, FilialRequestModel? filial, string? message)> Update(FilialRequestModel m);
+    Task<(bool success, FilialResponseModel? filial, string? message)> Update(FilialRequestModel m);
 
-    Task<(bool success, FilialRequestModel? filial, string? message)> Disable(int id);
+    Task<(bool success, FilialResponseModel? filial, string? message)> Disable(int id);
 
-    Task<(bool success, FilialRequestModel? filial, string? message)> Enable(int id);
+    Task<(bool success, FilialResponseModel? filial, string? message)> Enable(int id);
 
-    Task<(bool success, FilialRequestModel? filial, string? message)> GetByUserName(string userName);
+    Task<(bool success, FilialResponseModel? filial, string? message)> GetByUserName(string userName);
 
-    Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id);
+    Task<(bool success, FilialResponseModel? filial, string? message)> GetById(int id);
 
     Task<(bool success, FilialPageResponseModel filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
@@ -34,9 +34,9 @@ public class FilialsServices : IFilialsServices
         _filialRepository = filialRepository;
     }
 
-    private FilialRequestModel MapToFilialRequestModel(Filial filial)
+    private FilialResponseModel MapToFilialResponseModel(Filial filial)
     {
-        return new FilialRequestModel
+        return new FilialResponseModel
         {
             Id = filial.Id,
             InternalCode = filial.InternalCode,
@@ -48,7 +48,7 @@ public class FilialsServices : IFilialsServices
         };
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> Add(FilialRequestModel m)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> Add(FilialRequestModel m)
     {
         var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name);
         if (existingFilial != null)        
@@ -66,16 +66,21 @@ public class FilialsServices : IFilialsServices
             Lat = m.Lat,
             Lng = m.Lng,
             Active = m.Active,
+            CreatedAt = DateTime.UtcNow,
+            CreatedByUserId = m.UserId,
         };
 
         await _filialRepository.AddAsync(newFilial);
         await _filialRepository.SaveChangesAsync();
 
-        return (true, m, null);
+        var filialModel = MapToFilialResponseModel(newFilial);
+
+        return (true, filialModel, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> Update(FilialRequestModel m)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> Update(FilialRequestModel m)
     {
+
         var filial = await _filialRepository.GetAsync(x => x.Id == m.Id);
 
         if (filial == null)
@@ -97,14 +102,18 @@ public class FilialsServices : IFilialsServices
         filial.Lat = m.Lat;
         filial.Lng = m.Lng;
         filial.Active = m.Active;
+        filial.EditedAt = DateTime.UtcNow;
+        filial.EditedByUserId = m.UserId;
 
         await _filialRepository.UpdateAsync(filial);
         await _filialRepository.SaveChangesAsync();
 
-        return (true, m, null);
+        var filialModel = MapToFilialResponseModel(filial);
+
+        return (true, filialModel, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> Disable(int id)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> Disable(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 
@@ -118,10 +127,12 @@ public class FilialsServices : IFilialsServices
         await _filialRepository.UpdateAsync(filial);
         await _filialRepository.SaveChangesAsync();
 
-        return (true, null, null);
+        var filialModel = MapToFilialResponseModel(filial);
+
+        return (true, filialModel, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> Enable(int id)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> Enable(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 
@@ -135,10 +146,12 @@ public class FilialsServices : IFilialsServices
         await _filialRepository.UpdateAsync(filial);
         await _filialRepository.SaveChangesAsync();
 
-        return (true, null, null);
+        var filialModel = MapToFilialResponseModel(filial);
+
+        return (true, filialModel, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> GetByUserName(string userName)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> GetByUserName(string userName)
     {
         var filial = await _filialRepository.GetAsync(x => x.Name == userName);
 
@@ -147,7 +160,7 @@ public class FilialsServices : IFilialsServices
             return (false, null, "Filial not found.");
         }
 
-        var filialModel = MapToFilialRequestModel(filial);
+        var filialModel = MapToFilialResponseModel(filial);
 
         return (true, filialModel, null);
     }
@@ -184,7 +197,7 @@ public class FilialsServices : IFilialsServices
         var totalCount = filials.Count();
         filials = filials.Skip(page).Take(pageSize);
 
-        var filialModels = filials.ToArray().Select(x => MapToFilialRequestModel(x));
+        var filialModels = filials.ToArray().Select(x => MapToFilialResponseModel(x));
 
         var filialPageResponseModel = new FilialPageResponseModel
         {
@@ -195,7 +208,7 @@ public class FilialsServices : IFilialsServices
         return (true, filialPageResponseModel, null);
     }
 
-    public async Task<(bool success, FilialRequestModel? filial, string? message)> GetById(int id)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> GetById(int id)
     {
         var filial = await _filialRepository.GetAsync(x => x.Id == id);
 
@@ -204,7 +217,7 @@ public class FilialsServices : IFilialsServices
             return (false, null, "Filial not found.");
         }
 
-        var filialModel = MapToFilialRequestModel(filial);
+        var filialModel = MapToFilialResponseModel(filial);
 
         return (true, filialModel, null);
     }

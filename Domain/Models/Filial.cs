@@ -19,5 +19,15 @@ public partial class Filial
 
     public bool Active { get; set; }
 
+    public DateTime? CreatedAt { get; set; }
+
+    public int? CreatedByUserId { get; set; }
+
+    public DateTime? EditedAt { get; set; }
+
+    public int? EditedByUserId { get; set; }
+
+    public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }
