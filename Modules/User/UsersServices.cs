@@ -123,7 +123,7 @@ public class UsersServices : IUsersServices
 
         user.IsActive = false;
 
-        _userRepository.Update(user);
+        await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         return (true, null, null);
@@ -137,7 +137,7 @@ public class UsersServices : IUsersServices
 
         user.IsActive = true;
 
-        _userRepository.Update(user);
+        await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         return (true, null, null);
@@ -237,7 +237,7 @@ public class UsersServices : IUsersServices
             }
         }
 
-        _userRepository.Update(user);
+        await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         var userModel = MapToUserResponseModel(user);

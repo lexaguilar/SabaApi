@@ -49,7 +49,7 @@ public class AccountService : IAccountService
         user.Password = passwordHash;
         user.PasswordSalt = salt;
         user.LastPasswordChangedDate = DateTime.UtcNow;
-        _userRepository.Update(user);
+        await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         return (true, null);
@@ -70,8 +70,8 @@ public class AccountService : IAccountService
         user.Password = passwordHash;
         user.PasswordSalt = salt;
       
-        _userRepository.Update(user);
-        _userRepository.SaveChangesAsync();
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
 
         var message = new MimeMessage
         {               
@@ -101,7 +101,7 @@ public class AccountService : IAccountService
         }
 
         user.LastLoginDate = DateTime.UtcNow;
-        _userRepository.Update(user);
+        await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         var userModel = new UserModel
