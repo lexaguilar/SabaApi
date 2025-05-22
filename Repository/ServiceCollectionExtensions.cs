@@ -19,6 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRolesServices, RolesServices>();
         services.AddTransient<IMessageService, MessageService>();       
+        services.AddScoped<ITemplateRepository, TemplateRepository>();
+        services.AddScoped<ITemplatesServices, TemplatesServices>();
+        services.AddScoped<ICatalogGenericRepository, CatalogGenericRepository>();
+        services.AddScoped<ICatalogGenericsServices, CatalogGenericsServices>();
         return services;
     }
 }
