@@ -10,7 +10,7 @@ RUN dotnet restore
 # Copy the rest of the application code
 COPY . .
 # Build the ClientApp
-ARG BUILD_VERSION=1.2.3
+ARG BUILD_VERSION=1.2.3.0
 
 # Build the .NET application
 WORKDIR /source
