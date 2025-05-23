@@ -2,6 +2,7 @@ namespace Saba.Infrastructure.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Saba.Application.Extensions;
 using Saba.Application.Services;
 using Saba.Domain.ViewModels;
 
@@ -35,6 +36,10 @@ public class TemplatesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TemplateRequestModel model)
     {
+
+        var user = this.GetUser();
+        model.UserId = user.Id;
+
         var (success, template, message) = await _templateServices.Add(model);
         if (!success) return BadRequest(new { message });
         return Ok(template);
@@ -44,6 +49,10 @@ public class TemplatesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] TemplateRequestModel model)
     {
         if (id != model.Id) return BadRequest(new { message = "Id no coincide" });
+
+        var user = this.GetUser();
+        model.UserId = user.Id;
+
         var (success, template, message) = await _templateServices.Update(model);
         if (!success) return BadRequest(new { message });
         return Ok(template);

@@ -26,7 +26,8 @@ public class TemplateRepository : ITemplateRepository
     {
         return predicate == null
             ? _context.Templates.AsQueryable()
-            : _context.Templates.Where(predicate).AsQueryable();
+            : _context.Templates
+            .Where(predicate).AsQueryable();
     }
 
     public Task<Template?> GetAsync(Expression<Func<Template, bool>> predicate)

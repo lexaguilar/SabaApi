@@ -130,12 +130,6 @@ public class TemplatesServices : ITemplatesServices
         {
             foreach (var filter in filters)
             {
-                if (filter.Key == "id")
-                    items = items.Where(x => x.Id == int.Parse(filter.Value));
-                if (filter.Key == "name")
-                    items = items.Where(x => x.Name.Contains(filter.Value));
-                if (filter.Key == "active" && bool.TryParse(filter.Value, out bool isActive))
-                    items = items.Where(x => x.Active == isActive);
             }
         }
 
