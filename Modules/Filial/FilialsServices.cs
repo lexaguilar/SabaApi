@@ -4,23 +4,18 @@ using Saba.Domain.Models;
 using Saba.Domain.ViewModels;
 using Saba.Repository;
 using Saba.Application.Extensions;
+
 namespace Saba.Application.Services;
 
 public interface IFilialsServices
 {
     Task<(bool success, FilialResponseModel? filial, string? message)> Add(FilialRequestModel m);
-
     Task<(bool success, FilialResponseModel? filial, string? message)> Update(FilialRequestModel m);
-
     Task<(bool success, FilialResponseModel? filial, string? message)> Disable(int id);
-
     Task<(bool success, FilialResponseModel? filial, string? message)> Enable(int id);
-
     Task<(bool success, FilialResponseModel? filial, string? message)> GetByUserName(string userName);
-
     Task<(bool success, FilialResponseModel? filial, string? message)> GetById(int id);
-
-    Task<(bool success, FilialPageResponseModel filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, FilialPageResponseModel filialResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class FilialsServices : IFilialsServices
@@ -44,181 +39,116 @@ public class FilialsServices : IFilialsServices
             Address = filial.Address,
             Lat = filial.Lat,
             Lng = filial.Lng,
-            Active = filial.Active
+            Active = filial.Active,
+            CreatedAt = filial.CreatedAt,
+            CreatedByUserId = filial.CreatedByUserId,
+            EditedAt = filial.EditedAt,
+            EditedByUserId = filial.EditedByUserId,
         };
     }
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> Add(FilialRequestModel m)
     {
-        var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name);
-        if (existingFilial != null)        
-            return (false, null, "Ya existe una filial con ese nombre.");
-
-        var existingInternalCode = await _filialRepository.GetAsync(x => x.InternalCode == m.InternalCode);
-        if (existingInternalCode != null)        
-            return (false, null, "Ya existe una filial con ese código interno.");
+        var existing = await _filialRepository.GetAsync(x => x.Name == m.Name);
+        if (existing != null) return (false, null, "Ya existe un filial con ese nombre.");
 
         var newFilial = new Filial
         {
-            Name = m.Name,
+            Id = m.Id,
             InternalCode = m.InternalCode,
+            Name = m.Name,
             Address = m.Address,
             Lat = m.Lat,
             Lng = m.Lng,
             Active = m.Active,
             CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = m.UserId,
+            CreatedByUserId = m.UserId
         };
 
         await _filialRepository.AddAsync(newFilial);
         await _filialRepository.SaveChangesAsync();
 
-        var filialModel = MapToFilialResponseModel(newFilial);
-
-        return (true, filialModel, null);
+        return (true, MapToFilialResponseModel(newFilial), null);
     }
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> Update(FilialRequestModel m)
     {
+        var item = await _filialRepository.GetAsync(x => x.Id == m.Id);
+        if (item == null) return (false, null, "No encontrado.");
 
-        var filial = await _filialRepository.GetAsync(x => x.Id == m.Id);
+        var existing = await _filialRepository.GetAsync(x => x.Name == m.Name && x.Id != m.Id);
+        if (existing != null) return (false, null, "Ya existe un filial con ese nombre.");
 
-        if (filial == null)
-            return (false, null, "Filial not found.");
+        item.InternalCode = m.InternalCode;
+        item.Name = m.Name;
+        item.Address = m.Address;
+        item.Lat = m.Lat;
+        item.Lng = m.Lng;
+        item.Active = m.Active;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = m.UserId;
 
-        var existingFilial = await _filialRepository.GetAsync(x => x.Name == m.Name && x.Id != m.Id);
-        // Check if another filial with the same name exists, excluding the current one
-        if (existingFilial != null)        
-            return (false, null, "Ya existe una filial con ese nombre.");
-
-        var existingInternalCode = await _filialRepository.GetAsync(x => x.InternalCode == m.InternalCode && x.Id != m.Id);
-        // Check if another filial with the same internal code exists, excluding the current one
-        if (existingInternalCode != null)        
-            return (false, null, "Ya existe una filial con ese código interno.");
-
-        filial.Name = m.Name;
-        filial.InternalCode = m.InternalCode;
-        filial.Address = m.Address;
-        filial.Lat = m.Lat;
-        filial.Lng = m.Lng;
-        filial.Active = m.Active;
-        filial.EditedAt = DateTime.UtcNow;
-        filial.EditedByUserId = m.UserId;
-
-        await _filialRepository.UpdateAsync(filial);
+        await _filialRepository.UpdateAsync(item);
         await _filialRepository.SaveChangesAsync();
 
-        var filialModel = MapToFilialResponseModel(filial);
-
-        return (true, filialModel, null);
+        return (true, MapToFilialResponseModel(item), null);
     }
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> Disable(int id)
     {
-        var filial = await _filialRepository.GetAsync(x => x.Id == id);
-
-        if (filial == null)
-        {
-            return (false, null, "Filial not found.");
-        }
-
-        filial.Active = false;
-
-        await _filialRepository.UpdateAsync(filial);
+        var item = await _filialRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+        item.Active = false;
+        await _filialRepository.UpdateAsync(item);
         await _filialRepository.SaveChangesAsync();
-
-        var filialModel = MapToFilialResponseModel(filial);
-
-        return (true, filialModel, null);
+        return (true, MapToFilialResponseModel(item), null);
     }
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> Enable(int id)
     {
-        var filial = await _filialRepository.GetAsync(x => x.Id == id);
-
-        if (filial == null)
-        {
-            return (false, null, "Filial not found.");
-        }
-
-        filial.Active = true;
-
-        await _filialRepository.UpdateAsync(filial);
+        var item = await _filialRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+        item.Active = true;
+        await _filialRepository.UpdateAsync(item);
         await _filialRepository.SaveChangesAsync();
-
-        var filialModel = MapToFilialResponseModel(filial);
-
-        return (true, filialModel, null);
+        return (true, MapToFilialResponseModel(item), null);
     }
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> GetByUserName(string userName)
     {
-        var filial = await _filialRepository.GetAsync(x => x.Name == userName);
-
-        if (filial == null)
-        {
-            return (false, null, "Filial not found.");
-        }
-
-        var filialModel = MapToFilialResponseModel(filial);
-
-        return (true, filialModel, null);
+        var item = await _filialRepository.GetAsync(x => x.Name == userName);
+        if (item == null) return (false, null, "No encontrado.");
+        return (true, MapToFilialResponseModel(item), null);
     }
 
-    public async Task<(bool success, FilialPageResponseModel filials, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    public async Task<(bool success, FilialResponseModel? filial, string? message)> GetById(int id)
     {
-        var filials = await _filialRepository.GetAllAsync();
+        var item = await _filialRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+        return (true, MapToFilialResponseModel(item), null);
+    }
 
-
+    public async Task<(bool success, FilialPageResponseModel filialResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
+    {
+        var items = await _filialRepository.GetAllAsync();
 
         if (filters != null && filters.Count > 0)
         {
             foreach (var filter in filters)
             {
-
-                if (filter.Key == "Name")
-                {
-                    filials = filials.Where(x => x.Name.Contains(filter.Value));
-                }
-                else if (filter.Key == "Address")
-                {
-                    filials = filials.Where(x => x.Address.Contains(filter.Value));
-                }
-                else if (filter.Key == "active")
-                {
-                    if (bool.TryParse(filter.Value, out bool isActive))
-                    {
-                        filials = filials.Where(x => x.Active == isActive);
-                    }
-                }
-
+                if (filter.Key == "internalCode")
+                    items = items.Where(x => x.InternalCode.Contains(filter.Value));
+                if (filter.Key == "name")
+                    items = items.Where(x => x.Name.Contains(filter.Value));
+                if (filter.Key == "active" && bool.TryParse(filter.Value, out bool isActive))
+                    items = items.Where(x => x.Active == isActive);
             }
         }
-        var totalCount = filials.Count();
-        filials = filials.Skip(page).Take(pageSize);
 
-        var filialModels = filials.ToArray().Select(x => MapToFilialResponseModel(x));
+        var totalCount = items.Count();
+        items = items.Skip(page).Take(pageSize);
+        var list = items.ToList().Select(x => MapToFilialResponseModel(x));
 
-        var filialPageResponseModel = new FilialPageResponseModel
-        {
-            Items = filialModels,
-            TotalCount = totalCount
-        };
-
-        return (true, filialPageResponseModel, null);
-    }
-
-    public async Task<(bool success, FilialResponseModel? filial, string? message)> GetById(int id)
-    {
-        var filial = await _filialRepository.GetAsync(x => x.Id == id);
-
-        if (filial == null)
-        {
-            return (false, null, "Filial not found.");
-        }
-
-        var filialModel = MapToFilialResponseModel(filial);
-
-        return (true, filialModel, null);
+        return (true, new FilialPageResponseModel { Items = list, TotalCount = totalCount }, null);
     }
 }

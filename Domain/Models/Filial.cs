@@ -19,9 +19,9 @@ public partial class Filial
 
     public bool Active { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public int? CreatedByUserId { get; set; }
+    public int CreatedByUserId { get; set; }
 
     public DateTime? EditedAt { get; set; }
 

@@ -2,6 +2,7 @@ namespace Saba.Infrastructure.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Saba.Application.Extensions;
 using Saba.Application.Services;
 using Saba.Domain.ViewModels;
 
@@ -43,6 +44,7 @@ public class FilialsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] FilialRequestModel filialRequestModel)
     {
+        var user = this.GetUser();
         var (success, filial, message) = await _filialsServices.Add(filialRequestModel);
         if (!success)
             return BadRequest(new { message });
