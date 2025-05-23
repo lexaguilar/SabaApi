@@ -130,6 +130,10 @@ public class TemplatesServices : ITemplatesServices
         {
             foreach (var filter in filters)
             {
+                if (filter.Key == "templateCode")
+                    items = items.Where(x => x.TemplateCode != null && x.TemplateCode.Contains(filter.Value));
+                if (filter.Key == "name")
+                    items = items.Where(x => x.Name.Contains(filter.Value));
             }
         }
 
