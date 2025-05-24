@@ -21,8 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IMessageService, MessageService>();       
         services.AddScoped<ITemplateRepository, TemplateRepository>();
         services.AddScoped<ITemplatesServices, TemplatesServices>();
-        services.AddScoped<ICatalogGenericRepository, CatalogGenericRepository>();
-        services.AddScoped<ICatalogGenericsServices, CatalogGenericsServices>();
+        services.AddScoped<IGenericCatalogRepository, GenericCatalogRepository>();
+        services.AddScoped<IGenericCatalogsServices, GenericCatalogsServices>();
         services.AddScoped<ICatalogNameRepository, CatalogNameRepository>();
         services.AddScoped<ICatalogNamesServices, CatalogNamesServices>();
         return services;
