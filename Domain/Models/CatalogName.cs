@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace Saba.Domain.Models;
 
-public partial class GenericCatalog
+public partial class CatalogName
 {
     public int Id { get; set; }
 
-    public int CatalogNameId { get; set; }
-
-    public string CatalogValue { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 
@@ -21,5 +19,5 @@ public partial class GenericCatalog
 
     public bool Active { get; set; }
 
-    public virtual CatalogName CatalogName { get; set; } = null!;
+    public virtual ICollection<GenericCatalog> GenericCatalogs { get; set; } = new List<GenericCatalog>();
 }

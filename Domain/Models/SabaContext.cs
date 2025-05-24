@@ -15,6 +15,8 @@ public partial class SabaContext : DbContext
     {
     }
 
+    public virtual DbSet<CatalogName> CatalogNames { get; set; }
+
     public virtual DbSet<Client> Clients { get; set; }
 
     public virtual DbSet<Filial> Filials { get; set; }
@@ -47,6 +49,15 @@ public partial class SabaContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CatalogName>(entity =>
+        {
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.EditedAt).HasColumnType("datetime");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Client>(entity =>
         {
             entity.Property(e => e.Address)
@@ -84,12 +95,16 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<GenericCatalog>(entity =>
         {
-            entity.Property(e => e.CatalogName)
-                .HasMaxLength(50)
-                .IsUnicode(false);
             entity.Property(e => e.CatalogValue)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.EditedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.CatalogName).WithMany(p => p.GenericCatalogs)
+                .HasForeignKey(d => d.CatalogNameId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GenericCatalogs_CatalogNames");
         });
 
         modelBuilder.Entity<QuestionType>(entity =>
@@ -185,7 +200,7 @@ public partial class SabaContext : DbContext
             entity.HasOne(d => d.SurverUserState).WithMany(p => p.SurveyUsers)
                 .HasForeignKey(d => d.SurverUserStateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SurveyUsers_SurveyUserState");
+                .HasConstraintName("FK_SurveyUsers_SurveyUserStates");
 
             entity.HasOne(d => d.Survey).WithMany(p => p.SurveyUsers)
                 .HasForeignKey(d => d.SurveyId)
@@ -200,7 +215,7 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<SurveyUserState>(entity =>
         {
-            entity.ToTable("SurveyUserState");
+            entity.HasKey(e => e.Id).HasName("PK_SurveyUserState");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name)
