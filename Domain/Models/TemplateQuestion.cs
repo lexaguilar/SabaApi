@@ -20,6 +20,8 @@ public partial class TemplateQuestion
     public string? Uuid { get; set; }
 
     public string? ParentUuid { get; set; }
+    
+    public int? CatalogNameId { get; set; }
 
     public virtual QuestionType QuestionType { get; set; } = null!;
 
