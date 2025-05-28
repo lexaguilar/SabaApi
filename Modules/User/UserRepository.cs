@@ -28,12 +28,13 @@ public class UserRepository : IUserRepository
             ? _context.Users.AsQueryable()
             : _context.Users
                 .Include(x => x.Role)
+                .Include(x => x.Filials)
             .Where(predicate).AsQueryable();
     }
 
     public Task<User?> GetAsync(Expression<Func<User, bool>> predicate)
     {
-        var item = _context.Users.Include(x => x.Role).Where(predicate).FirstOrDefault();
+        var item = _context.Users.Include(x => x.Role).Include(x => x.Filials).Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 

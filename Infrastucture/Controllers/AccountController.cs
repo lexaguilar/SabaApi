@@ -30,6 +30,12 @@ public class AccountController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("sign-in-with-token")]
+    public IActionResult SignInWithToken()
+    {
+        return Ok(new { message = "sign-in-with-token" });
+    }
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
     {

@@ -25,6 +25,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGenericCatalogsServices, GenericCatalogsServices>();
         services.AddScoped<ICatalogNameRepository, CatalogNameRepository>();
         services.AddScoped<ICatalogNamesServices, CatalogNamesServices>();
+        services.AddScoped<ITemplateQuestionRepository, TemplateQuestionRepository>();
+        services.AddScoped<ITemplateQuestionsServices, TemplateQuestionsServices>();
         return services;
     }
 }

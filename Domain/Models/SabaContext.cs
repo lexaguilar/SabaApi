@@ -243,10 +243,7 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(150)
                 .IsUnicode(false);
-            entity.Property(e => e.ParentUuid)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.Uuid)
+            entity.Property(e => e.ParentId)
                 .HasMaxLength(100)
                 .IsUnicode(false);
 

@@ -7,8 +7,6 @@ public partial class TemplateQuestion
 {
     public int Id { get; set; }
 
-    public int? ParentId { get; set; }
-
     public int TemplateId { get; set; }
 
     public int QuestionTypeId { get; set; }
@@ -17,11 +15,10 @@ public partial class TemplateQuestion
 
     public bool? IsRequired { get; set; }
 
-    public string? Uuid { get; set; }
+    public int? ParentId { get; set; }
 
-    public string? ParentUuid { get; set; }
-    
     public int? CatalogNameId { get; set; }
+    public bool Active { get; set; } = true;
 
     public virtual QuestionType QuestionType { get; set; } = null!;
 
