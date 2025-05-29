@@ -27,6 +27,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICatalogNamesServices, CatalogNamesServices>();
         services.AddScoped<ITemplateQuestionRepository, TemplateQuestionRepository>();
         services.AddScoped<ITemplateQuestionsServices, TemplateQuestionsServices>();
+        services.AddScoped<ISurveyRepository, SurveyRepository>();
+        services.AddScoped<ISurveysServices, SurveysServices>();
+        services.AddScoped<IFilialUserRepository, FilialUserRepository>();
+        services.AddScoped<IFilialUsersServices, FilialUsersServices>();
         return services;
     }
 }

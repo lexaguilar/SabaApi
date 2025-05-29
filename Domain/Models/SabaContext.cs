@@ -20,6 +20,7 @@ public partial class SabaContext : DbContext
     public virtual DbSet<Client> Clients { get; set; }
 
     public virtual DbSet<Filial> Filials { get; set; }
+    public virtual DbSet<FilialUser> FilialUsers { get; set; }
 
     public virtual DbSet<GenericCatalog> GenericCatalogs { get; set; }
 
@@ -70,6 +71,11 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<FilialUser>(entity =>
+        {
+            entity.HasKey(e => new { e.FilialId, e.UserId });
         });
 
         modelBuilder.Entity<Filial>(entity =>
@@ -190,15 +196,15 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Observation)
                 .HasMaxLength(250)
                 .IsUnicode(false);
-            entity.Property(e => e.SurverUserStateId).HasComment("1 Pendiente, 2 Proceso, 3 Finalizada 4 Incompleto");
+            entity.Property(e => e.SurveyUserStateId).HasComment("1 Pendiente, 2 Proceso, 3 Finalizada 4 Incompleto");
 
             entity.HasOne(d => d.Filial).WithMany(p => p.SurveyUsers)
                 .HasForeignKey(d => d.FilialId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SurveyUsers_Filials");
 
-            entity.HasOne(d => d.SurverUserState).WithMany(p => p.SurveyUsers)
-                .HasForeignKey(d => d.SurverUserStateId)
+            entity.HasOne(d => d.SurveyUserState).WithMany(p => p.SurveyUsers)
+                .HasForeignKey(d => d.SurveyUserStateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SurveyUsers_SurveyUserStates");
 

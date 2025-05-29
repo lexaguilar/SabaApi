@@ -125,7 +125,8 @@ public class TemplatesServices : ITemplatesServices
     public async Task<(bool success, TemplatePageResponseModel templateResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var items = await _templateRepository.GetAllAsync();
-
+        items = items.OrderByDescending(x => x.Id);
+        
         if (filters != null && filters.Count > 0)
         {
             foreach (var filter in filters)
@@ -138,6 +139,13 @@ public class TemplatesServices : ITemplatesServices
         }
 
         var totalCount = items.Count();
+        
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        {
+            page = 0;
+            pageSize = totalCount;
+        }
+
         items = items.Skip(page).Take(pageSize);
         var list = items.ToList().Select(x => MapToTemplateResponseModel(x));
 

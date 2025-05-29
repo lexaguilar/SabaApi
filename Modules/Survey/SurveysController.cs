@@ -9,23 +9,21 @@ using Saba.Domain.ViewModels;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class TemplatesController : ControllerBase
+public class SurveysController : ControllerBase
 {
-    private readonly ITemplatesServices _templateServices;
-    public TemplatesController(ITemplatesServices templateServices)
+    private readonly ISurveysServices _surveyServices;
+    public SurveysController(ISurveysServices surveyServices)
     {
-        _templateServices = templateServices;
+        _surveyServices = surveyServices;
     }
 
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        var (success, templates, message) = await _templateServices.GetAll(skip, take, filters);
-        if (!success) return Ok(Array.Empty<TemplateResponseModel>());
-        return Ok(templates);
+        var (success, surveys, message) = await _surveyServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<SurveyResponseModel>());
+        return Ok(surveys);
     }
-
-    
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
@@ -33,57 +31,57 @@ public class TemplatesController : ControllerBase
         filters ??= new Dictionary<string, string>();
         filters.TryAdd("all-items", "true");
 
-        var (success, templates, message) = await _templateServices.GetAll(skip, take, filters);
-        if (!success) return Ok(Array.Empty<TemplateResponseModel>());
-        return Ok(templates.Items);
+        var (success, surveys, message) = await _surveyServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<SurveyResponseModel>());
+        return Ok(surveys.Items);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var (success, template, message) = await _templateServices.GetById(id);
+        var (success, survey, message) = await _surveyServices.GetById(id);
         if (!success) return NotFound(new { message });
-        return Ok(template);
+        return Ok(survey);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] TemplateRequestModel model)
+    public async Task<IActionResult> Create([FromBody] SurveyRequestModel model)
     {
 
         var user = this.GetUser();
         model.UserId = user.Id;
 
-        var (success, template, message) = await _templateServices.Add(model);
+        var (success, survey, message) = await _surveyServices.Add(model);
         if (!success) return BadRequest(new { message });
-        return Ok(template);
+        return Ok(survey);
     }
 
     [HttpPost("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] TemplateRequestModel model)
+    public async Task<IActionResult> Update(int id, [FromBody] SurveyRequestModel model)
     {
         if (id != model.Id) return BadRequest(new { message = "Id no coincide" });
 
         var user = this.GetUser();
         model.UserId = user.Id;
 
-        var (success, template, message) = await _templateServices.Update(model);
+        var (success, survey, message) = await _surveyServices.Update(model);
         if (!success) return BadRequest(new { message });
-        return Ok(template);
+        return Ok(survey);
     }
 
     [HttpGet("{id}/disable")]
     public async Task<IActionResult> Disable(int id)
     {
-        var (success, template, message) = await _templateServices.Disable(id);
+        var (success, survey, message) = await _surveyServices.Disable(id);
         if (!success) return BadRequest(new { message });
-        return Ok(template);
+        return Ok(survey);
     }
 
     [HttpGet("{id}/enable")]
     public async Task<IActionResult> Enable(int id)
     {
-        var (success, template, message) = await _templateServices.Enable(id);
+        var (success, survey, message) = await _surveyServices.Enable(id);
         if (!success) return BadRequest(new { message });
-        return Ok(template);
+        return Ok(survey);
     }
 }

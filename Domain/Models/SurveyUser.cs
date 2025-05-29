@@ -16,7 +16,7 @@ public partial class SurveyUser
     /// <summary>
     /// 1 Pendiente, 2 Proceso, 3 Finalizada 4 Incompleto
     /// </summary>
-    public int SurverUserStateId { get; set; }
+    public int SurveyUserStateId { get; set; }
 
     public string? Observation { get; set; }
 
@@ -30,7 +30,7 @@ public partial class SurveyUser
 
     public virtual Filial Filial { get; set; } = null!;
 
-    public virtual SurveyUserState SurverUserState { get; set; } = null!;
+    public virtual SurveyUserState SurveyUserState { get; set; } = null!;
 
     public virtual Survey Survey { get; set; } = null!;
 
