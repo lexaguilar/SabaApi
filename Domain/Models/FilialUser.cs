@@ -5,6 +5,8 @@ namespace Saba.Domain.Models;
 
 public partial class FilialUser
 {
+    public int Id { get; set; }
+
     public int UserId { get; set; }
 
     public int FilialId { get; set; }

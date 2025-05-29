@@ -39,9 +39,9 @@ public partial class User
 
     public DateTime TempTokenExpiration { get; set; }
 
+    public virtual ICollection<FilialUser> FilialUsers { get; set; } = new List<FilialUser>();
+
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();
-
-    public virtual ICollection<Filial> Filials { get; set; } = new List<Filial>();
 }

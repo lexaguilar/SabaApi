@@ -27,7 +27,7 @@ public partial class Filial
 
     public int? EditedByUserId { get; set; }
 
-    public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();
+    public virtual ICollection<FilialUser> FilialUsers { get; set; } = new List<FilialUser>();
 
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();
 }

@@ -53,7 +53,7 @@ public class UsersServices : IUsersServices
             IsActive = user.IsActive,
             CreateDate = user.CreateDate,
             LastLoginDate = user.LastLoginDate,
-            FilialIds = user.Filials.Select(x => x.Id).ToArray()
+            FilialIds = user.FilialUsers.Select(x => x.FilialId).ToArray()
         };
     }
 
@@ -89,8 +89,12 @@ public class UsersServices : IUsersServices
         {
             var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
             foreach (var filial in filials)
-            {               
-                newUser.Filials.Add(filial);
+            {
+                newUser.FilialUsers.Add(new FilialUser
+                {
+                    UserId = newUser.Id,
+                    FilialId = filial.Id
+                });
             }
         }
 
@@ -230,10 +234,14 @@ public class UsersServices : IUsersServices
         if (m.FilialIds != null && m.FilialIds.Length > 0)
         {
             var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
-            user.Filials.Clear();
+            user.FilialUsers.Clear();
             foreach (var filial in filials)
-            {              
-                user.Filials.Add(filial);               
+            {
+                user.FilialUsers.Add(new FilialUser
+                {
+                    UserId = user.Id,
+                    FilialId = filial.Id
+                });
             }
         }
 

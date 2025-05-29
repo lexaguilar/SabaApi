@@ -30,9 +30,9 @@ public partial class SurveyUser
 
     public virtual Filial Filial { get; set; } = null!;
 
-    public virtual SurveyUserState SurveyUserState { get; set; } = null!;
-
     public virtual Survey Survey { get; set; } = null!;
+
+    public virtual SurveyUserState SurveyUserState { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 }

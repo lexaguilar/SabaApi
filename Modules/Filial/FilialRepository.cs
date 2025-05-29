@@ -38,9 +38,9 @@ public class FilialRepository : IFilialRepository
 
     public Task<IQueryable<Filial>> GetFilialByUserIdAsync(int userId)
     {
-        IQueryable<Filial> filial = _context.Users.Include(x => x.Filials)
+        IQueryable<Filial> filial = _context.Users.Include(x => x.FilialUsers)
             .Where(x => x.Id == userId)
-            .SelectMany(x => x.Filials);
+            .SelectMany(x => x.FilialUsers.Select(fu => fu.Filial));
 
         return Task.FromResult(filial);
     }

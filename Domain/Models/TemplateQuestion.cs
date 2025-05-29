@@ -18,7 +18,8 @@ public partial class TemplateQuestion
     public int? ParentId { get; set; }
 
     public int? CatalogNameId { get; set; }
-    public bool Active { get; set; } = true;
+
+    public bool Active { get; set; }
 
     public virtual QuestionType QuestionType { get; set; } = null!;
 

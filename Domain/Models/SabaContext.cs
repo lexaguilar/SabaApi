@@ -20,6 +20,7 @@ public partial class SabaContext : DbContext
     public virtual DbSet<Client> Clients { get; set; }
 
     public virtual DbSet<Filial> Filials { get; set; }
+
     public virtual DbSet<FilialUser> FilialUsers { get; set; }
 
     public virtual DbSet<GenericCatalog> GenericCatalogs { get; set; }
@@ -33,6 +34,8 @@ public partial class SabaContext : DbContext
     public virtual DbSet<RoleResource> RoleResources { get; set; }
 
     public virtual DbSet<Survey> Surveys { get; set; }
+
+    public virtual DbSet<SurveyState> SurveyStates { get; set; }
 
     public virtual DbSet<SurveyUser> SurveyUsers { get; set; }
 
@@ -73,11 +76,6 @@ public partial class SabaContext : DbContext
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<FilialUser>(entity =>
-        {
-            entity.HasKey(e => new { e.FilialId, e.UserId });
-        });
-
         modelBuilder.Entity<Filial>(entity =>
         {
             entity.Property(e => e.Address)
@@ -97,6 +95,19 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<FilialUser>(entity =>
+        {
+            entity.HasOne(d => d.Filial).WithMany(p => p.FilialUsers)
+                .HasForeignKey(d => d.FilialId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FilialUsers_Filials");
+
+            entity.HasOne(d => d.User).WithMany(p => p.FilialUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FilialUsers_Users");
         });
 
         modelBuilder.Entity<GenericCatalog>(entity =>
@@ -182,11 +193,31 @@ public partial class SabaContext : DbContext
         {
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.SurveyState).WithMany(p => p.Surveys)
+                .HasForeignKey(d => d.SurveyStateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Surveys_SurveyStates");
 
             entity.HasOne(d => d.Template).WithMany(p => p.Surveys)
                 .HasForeignKey(d => d.TemplateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Surveys_Templates");
+        });
+
+        modelBuilder.Entity<SurveyState>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SurveyState");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<SurveyUser>(entity =>
@@ -203,15 +234,15 @@ public partial class SabaContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SurveyUsers_Filials");
 
-            entity.HasOne(d => d.SurveyUserState).WithMany(p => p.SurveyUsers)
-                .HasForeignKey(d => d.SurveyUserStateId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SurveyUsers_SurveyUserStates");
-
             entity.HasOne(d => d.Survey).WithMany(p => p.SurveyUsers)
                 .HasForeignKey(d => d.SurveyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SurveyUsers_Surveys");
+
+            entity.HasOne(d => d.SurveyUserState).WithMany(p => p.SurveyUsers)
+                .HasForeignKey(d => d.SurveyUserStateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SurveyUsers_SurveyUserStates");
 
             entity.HasOne(d => d.User).WithMany(p => p.SurveyUsers)
                 .HasForeignKey(d => d.UserId)
@@ -248,9 +279,6 @@ public partial class SabaContext : DbContext
         {
             entity.Property(e => e.Name)
                 .HasMaxLength(150)
-                .IsUnicode(false);
-            entity.Property(e => e.ParentId)
-                .HasMaxLength(100)
                 .IsUnicode(false);
 
             entity.HasOne(d => d.QuestionType).WithMany(p => p.TemplateQuestions)
@@ -298,23 +326,6 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Users_Roles");
-
-            entity.HasMany(d => d.Filials).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "FilialUser",
-                    r => r.HasOne<Filial>().WithMany()
-                        .HasForeignKey("FilialId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FilialUsers_Filials"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_FilialUsers_Users"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "FilialId");
-                        j.ToTable("FilialUsers");
-                    });
         });
 
         OnModelCreatingPartial(modelBuilder);

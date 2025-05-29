@@ -48,6 +48,7 @@ public class SurveysServices : ISurveysServices
             CreatedByUserId = survey.CreatedByUserId,
             EditedAt = survey.EditedAt,
             EditedByUserId = survey.EditedByUserId,
+            SurveyStateId = survey.SurveyStateId,
             Active = survey.Active,
         };
     }
@@ -68,6 +69,7 @@ public class SurveysServices : ISurveysServices
             MinGoal = m.MinGoal,
             ExpectedGoal = m.ExpectedGoal,
             Active = m.Active,
+            SurveyStateId = 1, //Pending
             CreatedAt = DateTime.UtcNow,
             CreatedByUserId = m.UserId
         };
