@@ -140,38 +140,6 @@ public class TemplateQuestionsServices : ITemplateQuestionsServices
                         items = items.Where(x => x.TemplateId == templateId);
                     }
                 }
-                // else if (filter.Key == "questionTypeId")
-                // {
-                //     if (int.TryParse(filter.Value, out var questionTypeId))
-                //     {
-                //         items = items.Where(x => x.QuestionTypeId == questionTypeId);
-                //     }
-                // }
-                // else if (filter.Key == "active")
-                // {
-                //     if (bool.TryParse(filter.Value, out var active))
-                //     {
-                //         items = items.Where(x => x.Active == active);
-                //     }
-                // }
-                // else if (filter.Key == "name")
-                // {
-                //     items = items.Where(x => x.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase));
-                // }
-                // else if (filter.Key == "parentId")
-                // {
-                //     if (int.TryParse(filter.Value, out var parentId))
-                //     {
-                //         items = items.Where(x => x.ParentId == parentId);
-                //     }
-                // }
-                // else if (filter.Key == "catalogNameId")
-                // {
-                //     if (int.TryParse(filter.Value, out var catalogNameId))
-                //     {
-                //         items = items.Where(x => x.CatalogNameId == catalogNameId);
-                //     }
-                // }
             }
         }
 

@@ -13,4 +13,5 @@ public partial class QuestionType : ICatalogo { }
 public partial class GenericCatalog : ICatalogo { }
 public partial class SurveyState : ICatalogo { }
 public partial class SurveyUserState : ICatalogo { }
+public partial class User : ICatalogo { }
 
