@@ -21,7 +21,11 @@ public partial class TemplateQuestion
 
     public bool Active { get; set; }
 
+    public virtual CatalogName? CatalogName { get; set; }
+
     public virtual QuestionType QuestionType { get; set; } = null!;
+
+    public virtual ICollection<SurveyUserResponse> SurveyUserResponses { get; set; } = new List<SurveyUserResponse>();
 
     public virtual Template Template { get; set; } = null!;
 }

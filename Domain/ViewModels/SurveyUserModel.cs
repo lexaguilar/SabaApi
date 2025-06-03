@@ -13,12 +13,17 @@ public partial class SurveyUserRequestModel
     
 }
 
-public partial class SurveyUserResponseModel:SurveyUserRequestModel
+public partial class SurveyUserResponseModel : SurveyUserRequestModel
 {
     public DateTime CreatedAt { get; set; }
     public int CreatedByUserId { get; set; }
     public DateTime? EditedAt { get; set; }
     public int? EditedByUserId { get; set; }
+    public string? SurveyName { get; set; }
+    public string? FilialName { get; set; }
+    public string? UserName { get; set; }
+    public int TotalQuestions { get; set; }
+    public int TotalResponses { get; set; }
 }
 
 public partial class SurveyUserPageResponseModel

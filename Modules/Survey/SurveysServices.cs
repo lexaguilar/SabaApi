@@ -21,14 +21,17 @@ public class SurveysServices : ISurveysServices
 {
     private readonly ISurveyRepository _surveyRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ITemplateQuestionsServices _templateQuestionsServices;
+
     private readonly IFilialUserRepository _filialUserRepository;
     private readonly AppSettings _appSettings;
 
-    public SurveysServices(ISurveyRepository surveyRepository, IUserRepository userRepository, IFilialUserRepository filialUserRepository, IOptions<AppSettings> appSettings)
+    public SurveysServices(ISurveyRepository surveyRepository, IUserRepository userRepository, ITemplateQuestionsServices templateQuestionsServices, IFilialUserRepository filialUserRepository, IOptions<AppSettings> appSettings)
     {
         _appSettings = appSettings.Value;
         _surveyRepository = surveyRepository;
         _userRepository = userRepository;
+        _templateQuestionsServices = templateQuestionsServices;
         _filialUserRepository = filialUserRepository;
     }
 
@@ -74,12 +77,21 @@ public class SurveysServices : ISurveysServices
             CreatedByUserId = m.UserId
         };
 
+        var questions = await _templateQuestionsServices.GetAll(0,0, new Dictionary<string, string> { { "active", "true" }, { "templateId", m.TemplateId.ToString() } });
+
         if (newSurvey.ApplyAllUser)
         {
-            
+
             var filialUsers = await _filialUserRepository.GetAllAsync();
             foreach (var filialUser in filialUsers)
             {
+                var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
+                {
+                    QuestionId = q.Id,
+                    Response = "",
+                    CompletedAt = null // Initially null, to be filled when the user completes the survey
+                }).ToList();
+
                 newSurvey.SurveyUsers.Add(new SurveyUser
                 {
                     UserId = filialUser.UserId,
@@ -89,6 +101,7 @@ public class SurveysServices : ISurveysServices
                     Observation = "",
                     CreatedByUserId = m.UserId,
                     CreatedAt = DateTime.UtcNow,
+                    SurveyUserResponses = surveyUserResponses
                 });
             }
         }

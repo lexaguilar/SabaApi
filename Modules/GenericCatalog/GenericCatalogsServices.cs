@@ -127,6 +127,13 @@ public class GenericCatalogsServices : IGenericCatalogsServices
         }
 
         var totalCount = items.Count();
+
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        {
+            page = 0;
+            pageSize = totalCount;
+        }
+
         items = items.Skip(page).Take(pageSize);
         var list = items.ToList().Select(x => MapToGenericCatalogResponseModel(x));
 

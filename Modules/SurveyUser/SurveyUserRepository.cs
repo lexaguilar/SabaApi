@@ -26,18 +26,31 @@ public class SurveyUserRepository : ISurveyUserRepository
     public async Task<IQueryable<SurveyUser>> GetAllAsync(Expression<Func<SurveyUser, bool>>? predicate = null)
     {
         return predicate == null
-            ? _context.SurveyUsers.AsQueryable()
+            ? _context.SurveyUsers
+                // .Include(x => x.User)
+                // .Include(x => x.Filial)
+                // .Include(x => x.SurveyUserState)
+                // .Include(x => x.Survey)
+                // .Include(x => x.SurveyUserResponses)
+            .AsQueryable()
             : _context.SurveyUsers
-                .Include(x => x.Survey)
-                .Include(x => x.User)
-                .Include(x => x.Filial)
-                .Include(x => x.SurveyUserState)
+                // .Include(x => x.User)
+                // .Include(x => x.Filial)
+                // .Include(x => x.SurveyUserState)
+                // .Include(x => x.Survey)
+                // .Include(x => x.SurveyUserResponses)
             .Where(predicate).AsQueryable();
     }
 
     public Task<SurveyUser?> GetAsync(Expression<Func<SurveyUser, bool>> predicate)
     {
-        var item = _context.SurveyUsers.Where(predicate).FirstOrDefault();
+        var item = _context.SurveyUsers
+            .Include(x => x.User)
+            .Include(x => x.Filial)
+            .Include(x => x.SurveyUserState)
+            .Include(x => x.Survey)
+            .Include(x => x.SurveyUserResponses).ThenInclude(x => x.Question)
+        .Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 

@@ -27,12 +27,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICatalogNamesServices, CatalogNamesServices>();
         services.AddScoped<ITemplateQuestionRepository, TemplateQuestionRepository>();
         services.AddScoped<ITemplateQuestionsServices, TemplateQuestionsServices>();
-        services.AddScoped<ISurveyRepository, SurveyRepository>();
+        services.AddScoped<ISurveyRepository, SurveyRepository>(); 
         services.AddScoped<ISurveysServices, SurveysServices>();
         services.AddScoped<IFilialUserRepository, FilialUserRepository>();
         services.AddScoped<IFilialUsersServices, FilialUsersServices>();
         services.AddScoped<ISurveyUserRepository, SurveyUserRepository>();
         services.AddScoped<ISurveyUsersServices, SurveyUsersServices>();
+        services.AddScoped<ISurveyUserResponseRepository, SurveyUserResponseRepository>();
+        services.AddScoped<ISurveyUserResponsesServices, SurveyUserResponsesServices>();
         return services;
     }
 }

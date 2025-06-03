@@ -51,14 +51,15 @@ public class TemplateQuestionsServices : ITemplateQuestionsServices
 
         var newTemplateQuestion = new TemplateQuestion
         {
-           Id = m.Id,
-           TemplateId = m.TemplateId,
-           QuestionTypeId = m.QuestionTypeId,
-           Name = m.Name,
-           IsRequired = m.IsRequired,
-           ParentId = m.ParentId,
-           CatalogNameId = m.CatalogNameId,
-           Active = m.Active,
+            Id = m.Id,
+            TemplateId = m.TemplateId,
+            QuestionTypeId = m.QuestionTypeId,
+            Name = m.Name,
+            IsRequired = m.IsRequired,
+            ParentId = m.ParentId,
+            CatalogNameId = m.CatalogNameId,
+            Active = m.Active,
+           
         };
 
         await _templateQuestionRepository.AddAsync(newTemplateQuestion);

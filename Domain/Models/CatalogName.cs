@@ -20,4 +20,6 @@ public partial class CatalogName
     public bool Active { get; set; }
 
     public virtual ICollection<GenericCatalog> GenericCatalogs { get; set; } = new List<GenericCatalog>();
+
+    public virtual ICollection<TemplateQuestion> TemplateQuestions { get; set; } = new List<TemplateQuestion>();
 }

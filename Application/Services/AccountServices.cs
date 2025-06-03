@@ -130,7 +130,7 @@ public class AccountService : IAccountService
         var tokenHandler = new JwtSecurityTokenHandler();
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.SecretToken));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-        DateTime expires = DateTime.UtcNow.AddMinutes(10);
+        DateTime expires = DateTime.UtcNow.AddHours(10);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

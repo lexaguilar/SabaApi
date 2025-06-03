@@ -39,6 +39,8 @@ public partial class SabaContext : DbContext
 
     public virtual DbSet<SurveyUser> SurveyUsers { get; set; }
 
+    public virtual DbSet<SurveyUserResponse> SurveyUserResponses { get; set; }
+
     public virtual DbSet<SurveyUserState> SurveyUserStates { get; set; }
 
     public virtual DbSet<Template> Templates { get; set; }
@@ -215,6 +217,7 @@ public partial class SabaContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_SurveyState");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -250,6 +253,26 @@ public partial class SabaContext : DbContext
                 .HasConstraintName("FK_SurveyUsers_Users");
         });
 
+        modelBuilder.Entity<SurveyUserResponse>(entity =>
+        {
+            entity.HasIndex(e => e.SurveyUserId, "IX_SurveyUserResponses").IsDescending();
+
+            entity.Property(e => e.CompletedAt).HasColumnType("datetime");
+            entity.Property(e => e.Response)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Question).WithMany(p => p.SurveyUserResponses)
+                .HasForeignKey(d => d.QuestionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SurveyUserResponses_TemplateQuestions");
+
+            entity.HasOne(d => d.SurveyUser).WithMany(p => p.SurveyUserResponses)
+                .HasForeignKey(d => d.SurveyUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SurveyUserResponses_SurveyUsers");
+        });
+
         modelBuilder.Entity<SurveyUserState>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_SurveyUserState");
@@ -280,6 +303,10 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(150)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.CatalogName).WithMany(p => p.TemplateQuestions)
+                .HasForeignKey(d => d.CatalogNameId)
+                .HasConstraintName("FK_TemplateQuestions_CatalogNames");
 
             entity.HasOne(d => d.QuestionType).WithMany(p => p.TemplateQuestions)
                 .HasForeignKey(d => d.QuestionTypeId)

@@ -11,6 +11,7 @@ public interface ISurveyUsersServices
 {
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Add(SurveyUserRequestModel m);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Update(SurveyUserRequestModel m);
+    Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Remove(int id);
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
@@ -41,6 +42,11 @@ public class SurveyUsersServices : ISurveyUsersServices
             CreatedByUserId = surveyUser.CreatedByUserId,
             EditedAt = surveyUser.EditedAt,
             EditedByUserId = surveyUser.EditedByUserId,
+            SurveyName = surveyUser.Survey?.Name,
+            FilialName = surveyUser.Filial?.Name,
+            UserName = surveyUser.User?.UserName,
+            TotalQuestions = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count() ?? 0,
+            TotalResponses = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Sum(x => x.CompletedAt != null ? 1 : 0) ?? 0
         };
     }
 
@@ -129,6 +135,20 @@ public class SurveyUsersServices : ISurveyUsersServices
         if (item == null) return (false, null, "No encontrado.");
         await _surveyUserRepository.RemoveAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
+        return (true, MapToSurveyUserResponseModel(item), null);
+    }
+
+    public async Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state)
+    {
+        var item = await _surveyUserRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        item.SurveyUserStateId = (int)state;
+        
+
+        await _surveyUserRepository.UpdateAsync(item);
+        await _surveyUserRepository.SaveChangesAsync();
+
         return (true, MapToSurveyUserResponseModel(item), null);
     }
 }

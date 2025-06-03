@@ -32,6 +32,8 @@ public partial class SurveyUser
 
     public virtual Survey Survey { get; set; } = null!;
 
+    public virtual ICollection<SurveyUserResponse> SurveyUserResponses { get; set; } = new List<SurveyUserResponse>();
+
     public virtual SurveyUserState SurveyUserState { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;

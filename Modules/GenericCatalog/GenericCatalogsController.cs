@@ -18,11 +18,21 @@ public class GenericCatalogsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         var (success, genericCatalogs, message) = await _genericCatalogServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<GenericCatalogResponseModel>());
         return Ok(genericCatalogs);
+    }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
+    {
+        filters ??= new Dictionary<string, string>();
+        filters.TryAdd("all-items", "true");
+        var (success, genericCatalogs, message) = await _genericCatalogServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<GenericCatalogResponseModel>());
+        return Ok(genericCatalogs.Items);
     }
 
     [HttpGet("{id}")]
