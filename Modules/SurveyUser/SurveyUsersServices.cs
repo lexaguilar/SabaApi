@@ -14,6 +14,7 @@ public interface ISurveyUsersServices
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Remove(int id);
+    Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(int id, int userId);
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
@@ -145,6 +146,24 @@ public class SurveyUsersServices : ISurveyUsersServices
 
         item.SurveyUserStateId = (int)state;
 
+
+        await _surveyUserRepository.UpdateAsync(item);
+        await _surveyUserRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyUserResponseModel(item), null);
+    }
+
+    public async Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(int id, int userId)
+    {
+        var item = await _surveyUserRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyUserStateId != (int)SurveyStates.EnProgreso)
+            return (false, null, "La encuesta no está en estado en progreso.");
+
+        item.SurveyUserStateId = (int)SurveyStates.Finalizado;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();

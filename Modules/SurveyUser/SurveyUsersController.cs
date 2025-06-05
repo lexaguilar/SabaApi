@@ -65,4 +65,13 @@ public class SurveyUsersController : ControllerBase
         if (!success) return BadRequest(new { message });
         return Ok(surveyUser);
     }
+
+    [HttpGet("{id}/FinishSurvey")]
+    public async Task<IActionResult> FinishSurvey(int id)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyUserServices.FinishSurvey(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
 }
