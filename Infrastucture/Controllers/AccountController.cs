@@ -49,6 +49,20 @@ public class AccountController : ControllerBase
         return Ok(new { message = "Password changed successfully." });
     }
 
+    [Authorize]
+    [HttpPost("change-password-manual")]
+    public async Task<IActionResult> ChangePasswordManual([FromBody] ChangePasswordManualModel model)
+    {
+        var user = this.GetUser();
+
+        var result = await accountService.ChangePassword(model, user.UserName);
+
+        if (!result.success)
+            return BadRequest(new { message = result.message });
+
+        return Ok(new { message = "Password changed successfully." });
+    }
+
     [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel userModel)

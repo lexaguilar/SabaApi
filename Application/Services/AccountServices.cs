@@ -18,6 +18,7 @@ public interface IAccountService
     Task<(bool success, string message)> ResetPassword(string email);
 
     Task<(bool success, string message)> ChangePassword(ChangePasswordModel m);
+    Task<(bool success, string message)> ChangePassword(ChangePasswordManualModel m, string userName);
 }
 
 public class AccountService : IAccountService
@@ -29,7 +30,7 @@ public class AccountService : IAccountService
 
     public AccountService(IUserRepository userRepository, IOptions<AppSettings> appSettings, IMessageService messageService)
     {
-        _messageService = messageService;   
+        _messageService = messageService;
         _appSettings = appSettings.Value;
         _userRepository = userRepository;
     }
@@ -55,26 +56,63 @@ public class AccountService : IAccountService
         return (true, null);
     }
 
+    public async Task<(bool success, string message)> ChangePassword(ChangePasswordManualModel m, string userName)
+    {
+        var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
+        if (user == null)
+            return (false, "User not found.");
+
+        var (passwordHash, salt) = CryptoHelper.ComputePassword(m.NewPassword);
+        user.Password = passwordHash;
+        user.PasswordSalt = salt;
+        user.LastPasswordChangedDate = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+
+        if (m.SendEmail)
+        {
+            var message = new MimeMessage
+            {
+                To = { new MailboxAddress(user.Name + ' ' + user.LastName, user.Email) }
+            };
+
+            var currentUser = await _userRepository.GetAsync(x => x.UserName == userName);
+            if (currentUser != null)
+                message.Cc.Add(new MailboxAddress(currentUser.Name + ' ' + currentUser.LastName, currentUser.Email));
+
+            message.Subject = "Saba - Cambio de contraseña";
+            message.Body = new TextPart("html")
+            {
+                Text = $"<h1>Cambio de contraseña</h1><p>Su contraseña ha sido cambiada exitosamente.</p><p>Su nueva contraseña es: {m.NewPassword}</p>"
+            };
+
+            // Send email with the token
+            await _messageService.SendAsync(message);
+        }
+
+        return (true, null);
+    }
+
     public async Task<(bool success, string message)> ResetPassword(string email)
     {
         var user = await _userRepository.GetAsync(x => x.Email == email);
         if (user == null)
-           user = await _userRepository.GetAsync(x => x.UserName == email);
+            user = await _userRepository.GetAsync(x => x.UserName == email);
         if (user == null)
             return (false, "No se encontró el usuario.");
 
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var (passwordHash, salt) = CryptoHelper.ComputePassword(password);
-        
+
         user.LastPasswordChangedDate = DateTime.UtcNow;
         user.Password = passwordHash;
         user.PasswordSalt = salt;
-      
+
         await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
         var message = new MimeMessage
-        {               
+        {
             To = { new MailboxAddress(user.Name, user.Email) }
         };
 
@@ -97,7 +135,7 @@ public class AccountService : IAccountService
 
         if (user == null || !CryptoHelper.ComparePassword(m.Password, user.Password, user.PasswordSalt))
         {
-            return (false, null,  "Invalid username or password.");
+            return (false, null, "Invalid username or password.");
         }
 
         user.LastLoginDate = DateTime.UtcNow;

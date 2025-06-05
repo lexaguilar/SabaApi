@@ -32,9 +32,16 @@ namespace Saba.Domain.ViewModels
         public string ConfirmPassword { get; set; }
     }
 
+    public class ChangePasswordManualModel
+    {
+        public string UserName { get; set; }
+        public string NewPassword { get; set; }
+        public bool SendEmail { get; set; } = true;
+    }
+
     public class ResetPasswordModel
     {
-        public string Username { get; set; }   
+        public string Username { get; set; }
     }
 
     public class ForgotPasswordConfirmationModel

@@ -85,32 +85,32 @@ public class SurveysServices : ISurveysServices
 
         var questions = await _templateQuestionsServices.GetAll(0, 0, new Dictionary<string, string> { { "active", "true" }, { "templateId", m.TemplateId.ToString() } });
 
-        if (newSurvey.ApplyAllUser)
-        {
+        // if (newSurvey.ApplyAllUser)
+        // {
 
-            var filialUsers = await _filialUserRepository.GetAllAsync(x => x.User.IsActive && x.User.RoleId == 2);// Assuming roleId 2 is for supervisor users
-            foreach (var filialUser in filialUsers)
-            {
-                var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
-                {
-                    QuestionId = q.Id,
-                    Response = "",
-                    CompletedAt = null // Initially null, to be filled when the user completes the survey
-                }).ToList();
+        //     var filialUsers = await _filialUserRepository.GetAllAsync(x => x.User.IsActive && x.User.RoleId == 2);// Assuming roleId 2 is for supervisor users
+        //     foreach (var filialUser in filialUsers)
+        //     {
+        //         var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
+        //         {
+        //             QuestionId = q.Id,
+        //             Response = "",
+        //             CompletedAt = null // Initially null, to be filled when the user completes the survey
+        //         }).ToList();
 
-                newSurvey.SurveyUsers.Add(new SurveyUser
-                {
-                    UserId = filialUser.UserId,
-                    SurveyId = newSurvey.Id,
-                    FilialId = filialUser.FilialId,
-                    SurveyUserStateId = 1, //Pending
-                    Observation = "",
-                    CreatedByUserId = m.UserId,
-                    CreatedAt = DateTime.UtcNow,
-                    SurveyUserResponses = surveyUserResponses
-                });
-            }
-        }
+        //         newSurvey.SurveyUsers.Add(new SurveyUser
+        //         {
+        //             UserId = filialUser.UserId,
+        //             SurveyId = newSurvey.Id,
+        //             FilialId = filialUser.FilialId,
+        //             SurveyUserStateId = 1, //Pending
+        //             Observation = "",
+        //             CreatedByUserId = m.UserId,
+        //             CreatedAt = DateTime.UtcNow,
+        //             SurveyUserResponses = surveyUserResponses
+        //         });
+        //     }
+        // }
 
         await _surveyRepository.AddAsync(newSurvey);
         await _surveyRepository.SaveChangesAsync();
