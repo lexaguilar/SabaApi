@@ -1,5 +1,6 @@
 namespace Saba.Infrastructure.Controllers;
 
+using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Saba.Application.Extensions;
@@ -18,7 +19,7 @@ public class SurveyUserResponsesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         var (success, surveyUserResponses, message) = await _surveyUserResponseServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<SurveyUserResponseResponseModel>());
@@ -26,13 +27,39 @@ public class SurveyUserResponsesController : ControllerBase
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         filters ??= new Dictionary<string, string>();
         filters.TryAdd("all-items", "true");
         var (success, surveyUserResponses, message) = await _surveyUserResponseServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<SurveyUserResponseResponseModel>());
         return Ok(surveyUserResponses.Items);
+    }
+
+    [HttpGet("pivotall")]
+    public async Task<IActionResult> GetPivotAll(int surveyId)
+    {
+        var (success, surveyUserResponses, message) = await _surveyUserResponseServices.GetPivotAll(surveyId);
+        if (!success) return Ok(Array.Empty<SurveyUserResponsePivotResponseModel>());
+        var result = DataTableToList(surveyUserResponses);
+        return Ok(result);
+    }
+
+    private List<Dictionary<string, object>> DataTableToList(DataTable table)
+    {
+        var result = new List<Dictionary<string, object>>();
+
+        foreach (DataRow row in table.Rows)
+        {
+            var dict = new Dictionary<string, object>();
+            foreach (DataColumn col in table.Columns)
+            {
+                dict[col.ColumnName] = row[col];
+            }
+            result.Add(dict);
+        }
+
+        return result;
     }
 
     [HttpGet("{id}")]

@@ -4,12 +4,13 @@ namespace Saba.Domain.ViewModels;
 
 public partial class SurveyUserRequestModel
 {
-    public int Id { get; set; } 
-    public int SurveyId { get; set; } 
-    public int UserId { get; set; } 
-    public int FilialId { get; set; } 
-    public int SurveyUserStateId { get; set; } 
+    public int Id { get; set; }
+    public int SurveyId { get; set; }
+    public int UserId { get; set; }
+    public int FilialId { get; set; }
+    public int SurveyUserStateId { get; set; }
     public string? Observation { get; set; } 
+    public int UserEditId { get; set; } 
     
 }
 

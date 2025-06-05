@@ -22,14 +22,13 @@ public class FilialUserRepository : IFilialUserRepository
     public async Task<IQueryable<FilialUser>> GetAllAsync(Expression<Func<FilialUser, bool>>? predicate = null)
     {
         return predicate == null
-            ? _context.FilialUsers.AsQueryable()
-            : _context.FilialUsers
-            .Where(predicate).AsQueryable();
+            ? _context.FilialUsers.Include(x => x.User).AsQueryable()
+            : _context.FilialUsers.Include(x => x.User).Where(predicate).AsQueryable();
     }
 
     public Task<FilialUser?> GetAsync(Expression<Func<FilialUser, bool>> predicate)
     {
-        var item = _context.FilialUsers.Where(predicate).FirstOrDefault();
+        var item = _context.FilialUsers.Include(x => x.User).Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 

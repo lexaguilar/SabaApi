@@ -182,6 +182,12 @@ public class UsersServices : IUsersServices
 
         var totalCount = users.Count();       
 
+         if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        {
+            page = 0;
+            pageSize = totalCount;
+        }
+
         users = users.Skip(page).Take(pageSize);
 
         var userModels = users.ToArray()
@@ -221,10 +227,11 @@ public class UsersServices : IUsersServices
 
     public async Task<(bool success, UserResponseModel? user, string? message)> Update(UserRequestModel m)
     {
-        var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
+        var user = await _userRepository.GetAsync(x => x.Id == m.Id);
         if (user == null)
             return (false, null, "User not found");
 
+        user.UserName = m.UserName;
         user.RoleId = m.RoleId;
         user.Name = m.Name;
         user.LastName = m.LastName;

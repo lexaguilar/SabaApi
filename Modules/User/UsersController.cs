@@ -30,6 +30,17 @@ public class UsersController : ControllerBase
         });
     }
 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    {
+        filters ??= new Dictionary<string, string>();
+        filters.TryAdd("all-items", "true");
+
+        var (success, templates, message) = await _usersServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<UserResponseModel>());
+        return Ok(templates.Items);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

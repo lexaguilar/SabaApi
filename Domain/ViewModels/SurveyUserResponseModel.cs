@@ -27,3 +27,15 @@ public partial class SurveyUserResponsePageResponseModel
     public IEnumerable<SurveyUserResponseResponseModel> Items { get; set; }
     public int TotalCount { get; set; }
 }
+
+public partial class SurveyUserResponsePivotResponseModel
+{
+    public int SurveyUserId { get; set; }
+    public int UserId { get; set; }
+    public string Username { get; set; }
+    public int FilialId { get; set; }
+    public string FilialName { get; set; }
+    public int QuestionId { get; set; }
+    public string QuestionName { get; set; }
+    public string Response { get; set; }
+}

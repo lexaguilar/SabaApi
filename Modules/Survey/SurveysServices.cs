@@ -12,7 +12,11 @@ public interface ISurveysServices
     Task<(bool success, SurveyResponseModel? survey, string? message)> Add(SurveyRequestModel m);
     Task<(bool success, SurveyResponseModel? survey, string? message)> Update(SurveyRequestModel m);
     Task<(bool success, SurveyResponseModel? survey, string? message)> Disable(int id);
-    Task<(bool success, SurveyResponseModel? survey, string? message)> Enable(int id);
+    Task<(bool success, SurveyResponseModel? survey, string? message)> Enable(int id);    
+    Task<(bool success, SurveyResponseModel? survey, string? message)> StartSurvey(int id, int userId);
+    Task<(bool success, SurveyResponseModel? survey, string? message)> FinishSurvey(int id, int userId);
+    Task<(bool success, SurveyResponseModel? survey, string? message)> PauseSurvey(int id, int userId);
+    Task<(bool success, SurveyResponseModel? survey, string? message)> ResumeSurvey(int id, int userId);
     Task<(bool success, SurveyResponseModel? survey, string? message)> GetById(int id);
     Task<(bool success, SurveyPageResponseModel surveyResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
@@ -53,6 +57,8 @@ public class SurveysServices : ISurveysServices
             EditedByUserId = survey.EditedByUserId,
             SurveyStateId = survey.SurveyStateId,
             Active = survey.Active,
+            Total = survey.SurveyUsers.Count,
+            TotalCompleted = survey.SurveyUsers.Count(x => x.SurveyUserStateId == (int)SurveyStates.Finalizado),
         };
     }
 
@@ -77,12 +83,12 @@ public class SurveysServices : ISurveysServices
             CreatedByUserId = m.UserId
         };
 
-        var questions = await _templateQuestionsServices.GetAll(0,0, new Dictionary<string, string> { { "active", "true" }, { "templateId", m.TemplateId.ToString() } });
+        var questions = await _templateQuestionsServices.GetAll(0, 0, new Dictionary<string, string> { { "active", "true" }, { "templateId", m.TemplateId.ToString() } });
 
         if (newSurvey.ApplyAllUser)
         {
 
-            var filialUsers = await _filialUserRepository.GetAllAsync();
+            var filialUsers = await _filialUserRepository.GetAllAsync(x => x.User.IsActive && x.User.RoleId == 2);// Assuming roleId 2 is for supervisor users
             foreach (var filialUser in filialUsers)
             {
                 var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
@@ -164,6 +170,8 @@ public class SurveysServices : ISurveysServices
         return (true, MapToSurveyResponseModel(item), null);
     }
 
+
+
     public async Task<(bool success, SurveyPageResponseModel surveyResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
         var items = await _surveyRepository.GetAllAsync();
@@ -197,4 +205,79 @@ public class SurveysServices : ISurveysServices
 
         return (true, new SurveyPageResponseModel { Items = list, TotalCount = totalCount }, null);
     }
+
+    public async Task<(bool success, SurveyResponseModel? survey, string? message)> StartSurvey(int id, int userId)
+    {
+        var item = await _surveyRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyStateId != (int)SurveyStates.Pendiente && item.SurveyStateId != (int)SurveyStates.Pausado)
+            return (false, null, "El survey no está en estado pendiente o pausado.");
+
+        item.StartedDate = DateTime.UtcNow;
+        item.SurveyStateId = (int)SurveyStates.EnProgreso;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
+
+        await _surveyRepository.UpdateAsync(item);
+        await _surveyRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyResponseModel(item), null);
+    }
+
+    public async Task<(bool success, SurveyResponseModel? survey, string? message)> FinishSurvey(int id, int userId)
+    {
+        var item = await _surveyRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyStateId != (int)SurveyStates.EnProgreso)
+            return (false, null, "El survey no está en estado en progreso.");
+
+        item.FinishedDate = DateTime.UtcNow;
+        item.SurveyStateId = (int)SurveyStates.Finalizado;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
+
+        await _surveyRepository.UpdateAsync(item);
+        await _surveyRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyResponseModel(item), null);
+    }
+
+    public async Task<(bool success, SurveyResponseModel? survey, string? message)> PauseSurvey(int id, int userId)
+    {
+        var item = await _surveyRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyStateId != (int)SurveyStates.EnProgreso)
+            return (false, null, "El survey no está en estado en progreso.");
+
+        item.SurveyStateId = (int)SurveyStates.Pausado;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
+
+        await _surveyRepository.UpdateAsync(item);
+        await _surveyRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyResponseModel(item), null);
+    }
+
+    public async Task<(bool success, SurveyResponseModel? survey, string? message)> ResumeSurvey(int id, int userId)
+    {
+        var item = await _surveyRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyStateId != (int)SurveyStates.Pausado)
+            return (false, null, "El survey no está en estado pausado.");
+
+        item.SurveyStateId = (int)SurveyStates.EnProgreso;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
+
+        await _surveyRepository.UpdateAsync(item);
+        await _surveyRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyResponseModel(item), null);
+    }
+
 }

@@ -33,7 +33,9 @@ public class SurveyRepository : ISurveyRepository
 
     public Task<Survey?> GetAsync(Expression<Func<Survey, bool>> predicate)
     {
-        var item = _context.Surveys.Where(predicate).FirstOrDefault();
+        var item = _context.Surveys
+        .Include(x => x.SurveyUsers)
+        .Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 

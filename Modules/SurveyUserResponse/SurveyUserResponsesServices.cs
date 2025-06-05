@@ -4,6 +4,7 @@ using Saba.Domain.Models;
 using Saba.Domain.ViewModels;
 using Saba.Repository;
 using Saba.Application.Extensions;
+using System.Data;
 
 namespace Saba.Application.Services;
 
@@ -13,6 +14,7 @@ public interface ISurveyUserResponsesServices
     Task<(bool success, SurveyUserResponseResponseModel? surveyUserResponse, string? message)> Update(SurveyUserResponseRequestModel m);
     Task<(bool success, SurveyUserResponseResponseModel? surveyUserResponse, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponsePageResponseModel surveyUserResponseResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, DataTable surveyUserResponseResult, string? message)> GetPivotAll(int surveyId);
 }
 
 public class SurveyUserResponsesServices : ISurveyUserResponsesServices
@@ -45,9 +47,9 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
                 CatalogNameId = surveyUserResponse.Question.CatalogNameId,
                 ParentId = surveyUserResponse.Question.ParentId,
                 IsRequired = surveyUserResponse.Question.IsRequired,
-               
+
             },
-            CatalogName = surveyUserResponse.Question.CatalogName?.Name ,
+            CatalogName = surveyUserResponse.Question.CatalogName?.Name,
 
         };
     }
@@ -121,5 +123,12 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
         var list = items.ToList().Select(x => MapToSurveyUserResponseResponseModel(x));
 
         return (true, new SurveyUserResponsePageResponseModel { Items = list, TotalCount = totalCount }, null);
+    }
+
+    public async Task<(bool success, DataTable surveyUserResponseResult, string? message)> GetPivotAll(int surveyId)
+    {
+        var items = await _surveyUserResponseRepository.GetAllPivotAsync(surveyId);
+
+        return (true, items, null);
     }
 }

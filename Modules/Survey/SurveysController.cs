@@ -18,7 +18,7 @@ public class SurveysController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         var (success, surveys, message) = await _surveyServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<SurveyResponseModel>());
@@ -26,7 +26,7 @@ public class SurveysController : ControllerBase
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         filters ??= new Dictionary<string, string>();
         filters.TryAdd("all-items", "true");
@@ -84,4 +84,41 @@ public class SurveysController : ControllerBase
         if (!success) return BadRequest(new { message });
         return Ok(survey);
     }
+
+    [HttpGet("{id}/StartSurvey")]
+    public async Task<IActionResult> StartSurvey(int id)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyServices.StartSurvey(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
+
+    [HttpGet("{id}/FinishSurvey")]
+    public async Task<IActionResult> FinishSurvey(int id)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyServices.FinishSurvey(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
+
+    [HttpGet("{id}/PauseSurvey")]
+    public async Task<IActionResult> PauseSurvey(int id)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyServices.PauseSurvey(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
+
+    [HttpGet("{id}/ResumeSurvey")]
+    public async Task<IActionResult> ResumeSurvey(int id)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyServices.ResumeSurvey(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
+
 }

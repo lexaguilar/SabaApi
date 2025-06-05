@@ -38,7 +38,7 @@ public class SurveyUsersController : ControllerBase
     {
 
         var user = this.GetUser();
-        model.UserId = user.Id;
+        model.UserEditId = user.Id;
 
         var (success, surveyUser, message) = await _surveyUserServices.Add(model);
         if (!success) return BadRequest(new { message });
@@ -51,7 +51,7 @@ public class SurveyUsersController : ControllerBase
         if (id != model.Id) return BadRequest(new { message = "Id no coincide" });
 
         var user = this.GetUser();
-        model.UserId = user.Id;
+        model.UserEditId = user.Id;
 
         var (success, surveyUser, message) = await _surveyUserServices.Update(model);
         if (!success) return BadRequest(new { message });

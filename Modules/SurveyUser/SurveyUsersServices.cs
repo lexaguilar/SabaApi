@@ -62,7 +62,7 @@ public class SurveyUsersServices : ISurveyUsersServices
             SurveyUserStateId = m.SurveyUserStateId,
             Observation = m.Observation,
             CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = m.UserId
+            CreatedByUserId = m.UserEditId
         };
 
         await _surveyUserRepository.AddAsync(newSurveyUser);
@@ -82,7 +82,7 @@ public class SurveyUsersServices : ISurveyUsersServices
         item.SurveyUserStateId = m.SurveyUserStateId;
         item.Observation = m.Observation;
         item.EditedAt = DateTime.UtcNow;
-        item.EditedByUserId = m.UserId;
+        item.EditedByUserId = m.UserEditId;
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
@@ -144,7 +144,7 @@ public class SurveyUsersServices : ISurveyUsersServices
         if (item == null) return (false, null, "No encontrado.");
 
         item.SurveyUserStateId = (int)state;
-        
+
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
