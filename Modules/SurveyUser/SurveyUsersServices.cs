@@ -21,12 +21,16 @@ public interface ISurveyUsersServices
 public class SurveyUsersServices : ISurveyUsersServices
 {
     private readonly ISurveyUserRepository _surveyUserRepository;
+    private readonly ITemplateQuestionsServices _templateQuestionsServices;
+    private readonly ISurveysServices _surveysServices;
     private readonly AppSettings _appSettings;
 
-    public SurveyUsersServices(ISurveyUserRepository surveyUserRepository, IOptions<AppSettings> appSettings)
+    public SurveyUsersServices(ISurveyUserRepository surveyUserRepository, ITemplateQuestionsServices templateQuestionsServices, ISurveysServices surveysServices, IOptions<AppSettings> appSettings)
     {
         _appSettings = appSettings.Value;
         _surveyUserRepository = surveyUserRepository;
+        _templateQuestionsServices = templateQuestionsServices;
+        _surveysServices = surveysServices;
     }
 
     private SurveyUserResponseModel MapToSurveyUserResponseModel(SurveyUser surveyUser)
@@ -47,12 +51,39 @@ public class SurveyUsersServices : ISurveyUsersServices
             FilialName = surveyUser.Filial?.Name,
             UserName = surveyUser.User?.UserName,
             TotalQuestions = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count() ?? 0,
-            TotalResponses = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Sum(x => x.CompletedAt != null ? 1 : 0) ?? 0
+            TotalResponses = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Sum(x => x.CompletedAt != null ? 1 : 0) ?? 0,
+            Latitude = surveyUser.Filial?.Lat,
+            Longitude = surveyUser.Filial?.Lng,
         };
     }
 
     public async Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Add(SurveyUserRequestModel m)
     {
+
+        if(m.SurveyUserStateId == 0)
+            m.SurveyUserStateId = (int)SurveyStates.Pendiente;
+
+        var surveyResult = await _surveysServices.GetById(m.SurveyId);
+
+        if (!surveyResult.success || surveyResult.survey == null)
+            return (false, null, surveyResult.message);
+
+        var survey = surveyResult.survey;
+
+        if (survey.TemplateId == 0)
+            return (false, null, "La encuesta no tiene un template asociado.");
+
+        if (survey.SurveyStateId != (int)SurveyStates.EnProgreso)
+            return (false, null, "La encuesta no está en progreso.");
+
+        var questions = await _templateQuestionsServices.GetAll(0, 0, new Dictionary<string, string> { { "active", "true" }, { "templateId", survey.TemplateId.ToString() } });
+
+        var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
+        {
+            QuestionId = q.Id,
+            Response = "",
+            CompletedAt = null
+        }).ToList();
 
         var newSurveyUser = new SurveyUser
         {
@@ -63,7 +94,8 @@ public class SurveyUsersServices : ISurveyUsersServices
             SurveyUserStateId = m.SurveyUserStateId,
             Observation = m.Observation,
             CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = m.UserEditId
+            CreatedByUserId = m.UserEditId,
+            SurveyUserResponses = surveyUserResponses
         };
 
         await _surveyUserRepository.AddAsync(newSurveyUser);

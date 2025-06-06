@@ -8,8 +8,8 @@ public partial class FilialRequestModel
     public string InternalCode { get; set; } =null!;
     public string Name { get; set; } =null!;
     public string? Address { get; set; } 
-    public string? Lat { get; set; } 
-    public string? Lng { get; set; } 
+    public decimal? Lat { get; set; } 
+    public decimal? Lng { get; set; } 
     public bool Active { get; set; } 
     [NotMapped]
     public int UserId { get; set; }

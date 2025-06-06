@@ -89,11 +89,9 @@ public partial class SabaContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.Lat)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+                .HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Lng)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+                .HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);

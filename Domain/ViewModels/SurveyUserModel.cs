@@ -25,6 +25,8 @@ public partial class SurveyUserResponseModel : SurveyUserRequestModel
     public string? UserName { get; set; }
     public int TotalQuestions { get; set; }
     public int TotalResponses { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
 }
 
 public partial class SurveyUserPageResponseModel
