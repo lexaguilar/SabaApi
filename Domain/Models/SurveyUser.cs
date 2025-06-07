@@ -27,6 +27,8 @@ public partial class SurveyUser
     public DateTime? EditedAt { get; set; }
 
     public int? EditedByUserId { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
 
     public virtual Filial Filial { get; set; } = null!;
 

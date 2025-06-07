@@ -11,10 +11,11 @@ public partial class SurveyUserResponseRequestModel
     public DateTime? CompletedAt { get; set; } 
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
-    
+    public string? FileNameUploaded { get; set; }
+
 }
 
-public partial class SurveyUserResponseResponseModel:SurveyUserResponseRequestModel
+public partial class SurveyUserResponseResponseModel : SurveyUserResponseRequestModel
 {
     public TemplateQuestionResponseModel Question { get; set; } = null!;
     public string? CatalogName { get; set; } // Assuming this is a property in TemplateQuestion
@@ -22,6 +23,7 @@ public partial class SurveyUserResponseResponseModel:SurveyUserResponseRequestMo
     public int CreatedByUserId { get; set; }
     public DateTime? EditedAt { get; set; }
     public int? EditedByUserId { get; set; }
+    
 }
 
 public partial class SurveyUserResponsePageResponseModel
