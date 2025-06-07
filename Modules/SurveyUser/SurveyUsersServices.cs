@@ -54,6 +54,7 @@ public class SurveyUsersServices : ISurveyUsersServices
             TotalResponses = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Sum(x => x.CompletedAt != null ? 1 : 0) ?? 0,
             Latitude = surveyUser.Filial?.Lat,
             Longitude = surveyUser.Filial?.Lng,
+            Evaluation = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count(x => x.Response  == "Si") ?? 0
         };
     }
 

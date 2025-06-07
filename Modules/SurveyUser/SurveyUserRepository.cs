@@ -30,15 +30,15 @@ public class SurveyUserRepository : ISurveyUserRepository
                 // .Include(x => x.User)
                 // .Include(x => x.Filial)
                 // .Include(x => x.SurveyUserState)
-                // .Include(x => x.Survey)
-                // .Include(x => x.SurveyUserResponses)
+                .Include(x => x.Survey)
+                .Include(x => x.SurveyUserResponses).ThenInclude(x => x.Question)
             .AsQueryable()
             : _context.SurveyUsers
                 // .Include(x => x.User)
                 // .Include(x => x.Filial)
                 // .Include(x => x.SurveyUserState)
-                // .Include(x => x.Survey)
-                // .Include(x => x.SurveyUserResponses)
+                .Include(x => x.Survey)
+                .Include(x => x.SurveyUserResponses).ThenInclude(x => x.Question)
             .Where(predicate).AsQueryable();
     }
 
