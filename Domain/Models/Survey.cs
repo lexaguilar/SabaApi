@@ -32,8 +32,10 @@ public partial class Survey
     public bool Active { get; set; }
 
     public int SurveyStateId { get; set; }
-    public DateTime? StartedDate { get; set; } 
-    public DateTime? FinishedDate { get; set; } 
+
+    public DateTime? StartedDate { get; set; }
+
+    public DateTime? FinishedDate { get; set; }
 
     public virtual SurveyState SurveyState { get; set; } = null!;
 

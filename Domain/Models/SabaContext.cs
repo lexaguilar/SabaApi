@@ -41,6 +41,8 @@ public partial class SabaContext : DbContext
 
     public virtual DbSet<SurveyUserResponse> SurveyUserResponses { get; set; }
 
+    public virtual DbSet<SurveyUserResponseFile> SurveyUserResponseFiles { get; set; }
+
     public virtual DbSet<SurveyUserState> SurveyUserStates { get; set; }
 
     public virtual DbSet<Template> Templates { get; set; }
@@ -88,10 +90,8 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.InternalCode)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.Lat)
-                .HasColumnType("decimal(18, 6)");
-            entity.Property(e => e.Lng)
-                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.Lat).HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.Lng).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -194,10 +194,12 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
             entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.FinishedDate).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.StartedDate).HasColumnType("datetime");
 
             entity.HasOne(d => d.SurveyState).WithMany(p => p.Surveys)
                 .HasForeignKey(d => d.SurveyStateId)
@@ -225,6 +227,8 @@ public partial class SabaContext : DbContext
         {
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
+            entity.Property(e => e.Latitude).HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.Longitude).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Observation)
                 .HasMaxLength(250)
                 .IsUnicode(false);
@@ -256,6 +260,11 @@ public partial class SabaContext : DbContext
             entity.HasIndex(e => e.SurveyUserId, "IX_SurveyUserResponses").IsDescending();
 
             entity.Property(e => e.CompletedAt).HasColumnType("datetime");
+            entity.Property(e => e.FileNameUploaded)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Latitude).HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.Longitude).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Response)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -269,6 +278,20 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.SurveyUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SurveyUserResponses_SurveyUsers");
+        });
+
+        modelBuilder.Entity<SurveyUserResponseFile>(entity =>
+        {
+            entity.HasIndex(e => e.SurveyUserResponseId, "IX_SurveyUserResponseFiles").IsDescending();
+
+            entity.Property(e => e.FileNameUploaded)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.SurveyUserResponse).WithMany(p => p.SurveyUserResponseFiles)
+                .HasForeignKey(d => d.SurveyUserResponseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SurveyUserResponseFiles_SurveyUserResponses");
         });
 
         modelBuilder.Entity<SurveyUserState>(entity =>
