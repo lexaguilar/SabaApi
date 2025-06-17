@@ -14,8 +14,9 @@ public partial class TemplateQuestionRequestModel
     public bool Active { get; set; } 
 }
 
-public partial class TemplateQuestionResponseModel:TemplateQuestionRequestModel
+public partial class TemplateQuestionResponseModel : TemplateQuestionRequestModel
 {
+    public int Files { get; set; }
 }
 
 public partial class TemplateQuestionPageResponseModel

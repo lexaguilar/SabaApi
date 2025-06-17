@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Saba.Domain.Models;
 
 namespace Saba.Repository;
@@ -9,6 +10,7 @@ public interface IRoleRepository
     Task<Role?> GetAsync(Expression<Func<Role, bool>> predicate);
     Task AddAsync(Role role);
     Task UpdateAsync(Role role);
+    Task UpdateResourcesAsync(int roleId, RoleResource[] roleResources);
     Task<int> SaveChangesAsync();
 }
 
@@ -28,7 +30,10 @@ public class RoleRepository : IRoleRepository
 
     public Task<Role?> GetAsync(Expression<Func<Role, bool>> predicate)
     {
-        return Task.FromResult(_context.Roles.FirstOrDefault(predicate));
+        return Task.FromResult(_context.Roles
+        .Include(x => x.RoleResources)
+        .ThenInclude(x => x.ResourceKeyNavigation)
+        .FirstOrDefault(predicate));
     }
 
     public async Task AddAsync(Role role)
@@ -39,6 +44,13 @@ public class RoleRepository : IRoleRepository
     public Task UpdateAsync(Role role)
     {
         _context.Roles.Update(role);
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateResourcesAsync(int roleId, RoleResource[] roleResources)
+    {
+        _context.RoleResources.RemoveRange(_context.RoleResources.Where(rr => rr.RoleId == roleId));
+        _context.RoleResources.AddRange(roleResources);
         return Task.CompletedTask;
     }
 

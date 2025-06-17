@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Saba;
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<SabaContext>(options => options.UseSqlServer("name
 builder.Services.AddControllers();
 builder.Services.AddRepositories();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(builder.Environment.ContentRootPath));
 
 builder.Services.AddCors(options =>
 {
@@ -81,7 +84,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 
 app.MapControllers();
 

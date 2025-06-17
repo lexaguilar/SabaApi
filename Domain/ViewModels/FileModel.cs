@@ -13,7 +13,9 @@ public class FileResponseModel
     public string FilePath { get; set; } = string.Empty;
 }
 
-public class FilePageResponseModel {
+public class FilePageResponseModel
+{
     public int TotalCount { get; set; }
+    public string QuestionName { get; set; } = string.Empty;
     public IEnumerable<FileResponseModel> Items { get; set; }
 }

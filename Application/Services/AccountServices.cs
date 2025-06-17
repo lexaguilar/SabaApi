@@ -155,6 +155,7 @@ public class AccountService : IAccountService
         var userReponse = new LoginModelReponse
         {
             User = userModel,
+            AccessResources = user.Role.RoleResources != null ? string.Join(",", user.Role.RoleResources.Where(x => x.Action == 1).Select(x => x.ResourceKey)) : string.Empty
         };
 
         var token = AuthenticateUser(userReponse);

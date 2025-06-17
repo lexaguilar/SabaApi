@@ -10,6 +10,7 @@ public partial class SurveyUserResponseFile
     public int SurveyUserResponseId { get; set; }
 
     public string FileNameUploaded { get; set; } = null!;
+    public string ContentType { get; set; } = null!;
 
     public virtual SurveyUserResponse SurveyUserResponse { get; set; } = null!;
 }

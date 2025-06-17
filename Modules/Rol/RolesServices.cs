@@ -13,6 +13,7 @@ public interface IRolesServices
     Task<(bool success, RoleResponseModel? role, string? message)> Disable(int id);
     Task<(bool success, RoleResponseModel? role, string? message)> Enable(int id);
     Task<(bool success, RoleResponseModel? role, string? message)> GetById(int id);
+    Task<(bool success, RoleResponseModel? role, string? message)> UpdateResources(int id, ResourcesRequestModel model);
     Task<(bool success, RolePageResponseModel roles, string? message)> GetAll(int page, int pageSize, Dictionary<string, string>? filters = null);
 }
 
@@ -36,7 +37,14 @@ public class RolesServices : IRolesServices
             CreatedAt = role.CreatedAt,
             CreatedByUserId = role.CreatedByUserId,
             EditedAt = role.EditedAt,
-            EditedByUserId = role.EditedByUserId
+            EditedByUserId = role.EditedByUserId,
+            RoleResources = role.RoleResources.Select(rr => new RoleResourceResponseModel
+            {
+                ResourceKey = rr.ResourceKey,
+                Name = rr.ResourceKeyNavigation?.Name ?? string.Empty,
+                Description = rr.ResourceKeyNavigation?.Description ?? string.Empty,
+                ParentResourceKey = rr.ResourceKeyNavigation?.ParentResourceKey ?? string.Empty
+            }).ToList()
         };
     }
 
@@ -120,7 +128,7 @@ public class RolesServices : IRolesServices
 
         var totalCount = roles.Count();
         roles = roles.Skip(page).Take(pageSize);
-       
+
         var rolePageResponseModel = new RolePageResponseModel
         {
             TotalCount = totalCount,
@@ -135,6 +143,28 @@ public class RolesServices : IRolesServices
         var role = await _roleRepository.GetAsync(x => x.Id == id);
         if (role == null)
             return (false, null, "Rol no encontrado.");
+        return (true, MapToRoleResponseModel(role), null);
+    }
+
+    public async Task<(bool success, RoleResponseModel? role, string? message)> UpdateResources(int id, ResourcesRequestModel model)
+    {
+        var role = await _roleRepository.GetAsync(x => x.Id == id);
+        if (role == null)
+            return (false, null, "Rol no encontrado.");
+        //remove all existing resources
+      
+        foreach (var resourceKey in model.ResourcesKey)
+        {
+            role.RoleResources.Add(new RoleResource
+            {
+                ResourceKey = resourceKey,
+                Action = 1, // Assuming action is always 1 for this case
+                RoleId = role.Id
+            });
+        }
+
+        await _roleRepository.UpdateResourcesAsync(role.Id, role.RoleResources.ToArray());
+        await _roleRepository.SaveChangesAsync();
         return (true, MapToRoleResponseModel(role), null);
     }
 }

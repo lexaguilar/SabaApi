@@ -29,11 +29,13 @@ public class SurveyUserResponseRepository : ISurveyUserResponseRepository
     {
         return predicate == null
             ? _context.SurveyUserResponses
+            .Include(x => x.SurveyUserResponseFiles)
             .Include(x => x.SurveyUser)
             .Include(x => x.Question)
             .ThenInclude(x => x.CatalogName)
             .AsQueryable()
             : _context.SurveyUserResponses
+            .Include(x => x.SurveyUserResponseFiles)
             .Include(x => x.SurveyUser)
             .Include(x => x.Question)
             .ThenInclude(x => x.CatalogName)
@@ -65,7 +67,10 @@ public class SurveyUserResponseRepository : ISurveyUserResponseRepository
 
     public Task<SurveyUserResponse?> GetAsync(Expression<Func<SurveyUserResponse, bool>> predicate)
     {
-        var item = _context.SurveyUserResponses.Include(x => x.Question).ThenInclude(x => x.CatalogName).Where(predicate).FirstOrDefault();
+        var item = _context.SurveyUserResponses
+        .Include(x => x.SurveyUserResponseFiles)
+        .Include(x => x.Question)
+        .ThenInclude(x => x.CatalogName).Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 

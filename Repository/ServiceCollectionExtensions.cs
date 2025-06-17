@@ -35,6 +35,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISurveyUsersServices, SurveyUsersServices>();
         services.AddScoped<ISurveyUserResponseRepository, SurveyUserResponseRepository>();
         services.AddScoped<ISurveyUserResponsesServices, SurveyUserResponsesServices>();
+        services.AddScoped<ISurveyUserResponseFileRepository, SurveyUserResponseFileRepository>();
+        services.AddScoped<ISurveyUserResponseFilesServices, SurveyUserResponseFilesServices>();
+        services.AddScoped<IFilesServices, FilesServices>();
+        services.AddScoped<IResourceRepository, ResourceRepository>();
+        services.AddScoped<IResourcesServices, ResourcesServices>();
         return services;
     }
 }

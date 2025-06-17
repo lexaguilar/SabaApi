@@ -24,9 +24,10 @@ public class RolesController : ControllerBase
 
         if (!success) return Ok(Array.Empty<FilialRequestModel>());
 
-         return Ok(new {
+        return Ok(new
+        {
             items = roles.Items,
-            totalCount = roles.TotalCount 
+            totalCount = roles.TotalCount
         });
     }
 
@@ -50,9 +51,9 @@ public class RolesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] RoleRequestModel model)
     {
         var user = this.GetUser();
-        
+
         model.UserId = user.Id;
-        
+
         var (success, role, message) = await _rolesServices.Update(model);
         if (!success) return BadRequest(new { message });
         return Ok(role);
@@ -71,6 +72,16 @@ public class RolesController : ControllerBase
     {
         var (success, role, message) = await _rolesServices.Enable(id);
         if (!success) return BadRequest(new { message });
+        return Ok(role);
+    }
+
+    [HttpPost("UpdateResources/{id}")]
+    public async Task<IActionResult> UpdateResources(int id, [FromBody] ResourcesRequestModel model)
+    {
+
+        var (success, role, message) = await _rolesServices.UpdateResources(id, model);
+        if (!success) return BadRequest(new { message });
+
         return Ok(role);
     }
 }

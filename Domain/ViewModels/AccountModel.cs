@@ -11,6 +11,7 @@ namespace Saba.Domain.ViewModels
     {
         public string Token { get; set; } = null!;
         public UserModel User { get; set; } = null!;
+        public string AccessResources { get; set; } = null!;
      
     }
 

@@ -47,6 +47,7 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
                 CatalogNameId = surveyUserResponse.Question.CatalogNameId,
                 ParentId = surveyUserResponse.Question.ParentId,
                 IsRequired = surveyUserResponse.Question.IsRequired,
+                Files = surveyUserResponse.SurveyUserResponseFiles.Count(),
 
             },
             CatalogName = surveyUserResponse.Question.CatalogName?.Name,

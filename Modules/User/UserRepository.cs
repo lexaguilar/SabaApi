@@ -31,7 +31,11 @@ public class UserRepository : IUserRepository
 
     public Task<User?> GetAsync(Expression<Func<User, bool>> predicate)
     {
-        var item = _context.Users.Include(x => x.Role).Include(x => x.FilialUsers).Where(predicate).FirstOrDefault();
+        var item = _context.Users
+        .Include(x => x.FilialUsers)
+        .Include(x => x.Role)
+        .ThenInclude(x => x.RoleResources)
+        .Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
     }
 
