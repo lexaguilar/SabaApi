@@ -15,7 +15,7 @@ builder.Services.AddDbContext<SabaContext>(options => options.UseSqlServer("name
 builder.Services.AddControllers();
 builder.Services.AddRepositories();
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(builder.Environment.ContentRootPath));
 
 builder.Services.AddCors(options =>

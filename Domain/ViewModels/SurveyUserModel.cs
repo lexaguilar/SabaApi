@@ -27,11 +27,26 @@ public partial class SurveyUserResponseModel : SurveyUserRequestModel
     public int TotalResponses { get; set; }
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
+    public decimal? FilialLatitude { get; set; }
+    public decimal? FilialLongitude { get; set; }
     public int Evaluation { get; set; }
+    public decimal? Distance { get; set; }
+    public string? AdministratorNameFilial { get; set; }
+    public string? OwnerFilial { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+
 }
 
 public partial class SurveyUserPageResponseModel
 {
     public IEnumerable<SurveyUserResponseModel> Items { get; set; }
     public int TotalCount { get; set; }
+}
+
+public partial class FinishSurveyUserRequestModel
+{
+    public int Id { get; set; }
+    public string AdministratorNameFilial { get; set; } = string.Empty;
+    public string OwnerFilial { get; set; } = string.Empty;
 }

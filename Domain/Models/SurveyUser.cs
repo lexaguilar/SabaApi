@@ -32,6 +32,16 @@ public partial class SurveyUser
 
     public decimal? Longitude { get; set; }
 
+    public decimal? Distance { get; set; }
+
+    public string? AdministratorNameFilial { get; set; }
+
+    public string? OwnerFilial { get; set; }
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? EndDate { get; set; }
+
     public virtual Filial Filial { get; set; } = null!;
 
     public virtual Survey Survey { get; set; } = null!;

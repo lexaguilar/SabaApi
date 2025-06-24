@@ -12,6 +12,7 @@ public partial class SurveyUserResponseRequestModel
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public string? FileNameUploaded { get; set; }
+    public string? Comment { get; set; }
 
 }
 
@@ -23,6 +24,7 @@ public partial class SurveyUserResponseResponseModel : SurveyUserResponseRequest
     public int CreatedByUserId { get; set; }
     public DateTime? EditedAt { get; set; }
     public int? EditedByUserId { get; set; }
+    public int SurveyUserStateId { get; set; }
     
 }
 

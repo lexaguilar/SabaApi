@@ -23,9 +23,11 @@ public partial class TemplateQuestion
 
     public virtual CatalogName? CatalogName { get; set; }
 
+    public virtual ICollection<TemplateQuestion> InverseParent { get; set; } = new List<TemplateQuestion>();
+
+    public virtual TemplateQuestion? Parent { get; set; }
+
     public virtual QuestionType QuestionType { get; set; } = null!;
 
     public virtual ICollection<SurveyUserResponse> SurveyUserResponses { get; set; } = new List<SurveyUserResponse>();
-
-    public virtual Template Template { get; set; } = null!;
 }

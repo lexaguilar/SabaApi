@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IUsersServices, UsersServices>();
@@ -40,6 +41,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFilesServices, FilesServices>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IResourcesServices, ResourcesServices>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IReportsServices, ReportsServices>();
         return services;
     }
 }

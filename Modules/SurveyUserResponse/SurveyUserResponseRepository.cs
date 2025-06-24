@@ -69,6 +69,7 @@ public class SurveyUserResponseRepository : ISurveyUserResponseRepository
     {
         var item = _context.SurveyUserResponses
         .Include(x => x.SurveyUserResponseFiles)
+        .Include(x => x.SurveyUser)
         .Include(x => x.Question)
         .ThenInclude(x => x.CatalogName).Where(predicate).FirstOrDefault();
         return Task.FromResult(item);

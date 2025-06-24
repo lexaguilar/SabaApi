@@ -106,7 +106,7 @@ public partial class SabaContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.FilialUsers)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FilialUsers_Users");
         });
 
@@ -145,7 +145,7 @@ public partial class SabaContext : DbContext
                 .HasMaxLength(200)
                 .IsUnicode(false);
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
+                .HasMaxLength(150)
                 .IsUnicode(false);
             entity.Property(e => e.ParentResourceKey)
                 .HasMaxLength(50)
@@ -225,13 +225,24 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<SurveyUser>(entity =>
         {
+            entity.Property(e => e.AdministratorNameFilial)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Distance)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(38, 0)");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
             entity.Property(e => e.Latitude).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Longitude).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.Observation)
                 .HasMaxLength(250)
                 .IsUnicode(false);
+            entity.Property(e => e.OwnerFilial)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.SurveyUserStateId).HasComment("1 Pendiente, 2 Proceso, 3 Finalizada 4 Incompleto");
 
             entity.HasOne(d => d.Filial).WithMany(p => p.SurveyUsers)
@@ -259,6 +270,9 @@ public partial class SabaContext : DbContext
         {
             entity.HasIndex(e => e.SurveyUserId, "IX_SurveyUserResponses").IsDescending();
 
+            entity.Property(e => e.Comment)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.CompletedAt).HasColumnType("datetime");
             entity.Property(e => e.FileNameUploaded)
                 .HasMaxLength(250)
@@ -284,6 +298,9 @@ public partial class SabaContext : DbContext
         {
             entity.HasIndex(e => e.SurveyUserResponseId, "IX_SurveyUserResponseFiles").IsDescending();
 
+            entity.Property(e => e.ContentType)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.FileNameUploaded)
                 .HasMaxLength(150)
                 .IsUnicode(false);
@@ -329,15 +346,14 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.CatalogNameId)
                 .HasConstraintName("FK_TemplateQuestions_CatalogNames");
 
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_TemplateQuestions_TemplateQuestions");
+
             entity.HasOne(d => d.QuestionType).WithMany(p => p.TemplateQuestions)
                 .HasForeignKey(d => d.QuestionTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TemplateQuestions_QuestionTypes");
-
-            entity.HasOne(d => d.Template).WithMany(p => p.TemplateQuestions)
-                .HasForeignKey(d => d.TemplateId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_TemplateQuestions_Templates");
         });
 
         modelBuilder.Entity<User>(entity =>

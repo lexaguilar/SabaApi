@@ -21,6 +21,8 @@ public partial class SurveyUserResponse
 
     public string? FileNameUploaded { get; set; }
 
+    public string? Comment { get; set; }
+
     public virtual TemplateQuestion Question { get; set; } = null!;
 
     public virtual SurveyUser SurveyUser { get; set; } = null!;

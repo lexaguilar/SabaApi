@@ -51,6 +51,8 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
 
             },
             CatalogName = surveyUserResponse.Question.CatalogName?.Name,
+            SurveyUserStateId = surveyUserResponse.SurveyUser.SurveyUserStateId,
+            Comment = surveyUserResponse.Comment,
 
         };
     }
@@ -81,12 +83,14 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
         //item.SurveyUserId = m.SurveyUserId;
         //item.QuestionId = m.QuestionId;
         item.Response = m.Response;
+        item.Comment = m.Comment;
         item.CompletedAt = DateTime.UtcNow;
 
         await _surveyUserResponseRepository.UpdateAsync(item);
+
         await _surveyUserResponseRepository.SaveChangesAsync();
 
-        await _surveyUsersServices.UpdateSurveyUserState(item.SurveyUserId, SurveyStates.EnProgreso);
+        await _surveyUsersServices.UpdateSurveyUserState(item.SurveyUserId, SurveyStates.EnProgreso, Latitude: m.Latitude, Longitude: m.Longitude);
 
         return (true, MapToSurveyUserResponseResponseModel(item), null);
     }

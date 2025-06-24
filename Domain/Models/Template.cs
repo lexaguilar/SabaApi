@@ -24,6 +24,4 @@ public partial class Template
     public bool Active { get; set; }
 
     public virtual ICollection<Survey> Surveys { get; set; } = new List<Survey>();
-
-    public virtual ICollection<TemplateQuestion> TemplateQuestions { get; set; } = new List<TemplateQuestion>();
 }

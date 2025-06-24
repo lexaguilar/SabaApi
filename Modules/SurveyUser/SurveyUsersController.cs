@@ -66,11 +66,11 @@ public class SurveyUsersController : ControllerBase
         return Ok(surveyUser);
     }
 
-    [HttpGet("{id}/FinishSurvey")]
-    public async Task<IActionResult> FinishSurvey(int id)
+    [HttpPost("{id}/FinishSurvey")]
+    public async Task<IActionResult> FinishSurvey([FromBody] FinishSurveyUserRequestModel model)
     {
         var user = this.GetUser();
-        var (success, survey, message) = await _surveyUserServices.FinishSurvey(id, user.Id);
+        var (success, survey, message) = await _surveyUserServices.FinishSurvey(model, user.Id);
         if (!success) return BadRequest(new { message });
         return Ok(survey);
     }

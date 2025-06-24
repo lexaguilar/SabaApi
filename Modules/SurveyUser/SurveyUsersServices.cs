@@ -11,26 +11,28 @@ public interface ISurveyUsersServices
 {
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Add(SurveyUserRequestModel m);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Update(SurveyUserRequestModel m);
-    Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state);
+    Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state, decimal? Latitude = null, decimal? Longitude = null);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Remove(int id);
-    Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(int id, int userId);
+    Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(FinishSurveyUserRequestModel model, int userId);
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
 }
 
 public class SurveyUsersServices : ISurveyUsersServices
 {
     private readonly ISurveyUserRepository _surveyUserRepository;
+    private readonly IFilialsServices _filialsServices;
     private readonly ITemplateQuestionsServices _templateQuestionsServices;
     private readonly ISurveysServices _surveysServices;
     private readonly AppSettings _appSettings;
 
-    public SurveyUsersServices(ISurveyUserRepository surveyUserRepository, ITemplateQuestionsServices templateQuestionsServices, ISurveysServices surveysServices, IOptions<AppSettings> appSettings)
+    public SurveyUsersServices(ISurveyUserRepository surveyUserRepository, ITemplateQuestionsServices templateQuestionsServices, ISurveysServices surveysServices, IOptions<AppSettings> appSettings, IFilialsServices filialsServices)
     {
         _appSettings = appSettings.Value;
         _surveyUserRepository = surveyUserRepository;
         _templateQuestionsServices = templateQuestionsServices;
         _surveysServices = surveysServices;
+        _filialsServices = filialsServices;
     }
 
     private SurveyUserResponseModel MapToSurveyUserResponseModel(SurveyUser surveyUser)
@@ -49,12 +51,19 @@ public class SurveyUsersServices : ISurveyUsersServices
             EditedByUserId = surveyUser.EditedByUserId,
             SurveyName = surveyUser.Survey?.Name,
             FilialName = surveyUser.Filial?.Name,
+            FilialLatitude = surveyUser.Filial?.Lat,
+            FilialLongitude = surveyUser.Filial?.Lng,
             UserName = surveyUser.User?.UserName,
             TotalQuestions = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count() ?? 0,
             TotalResponses = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Sum(x => x.CompletedAt != null ? 1 : 0) ?? 0,
-            Latitude = surveyUser.Filial?.Lat,
-            Longitude = surveyUser.Filial?.Lng,
-            Evaluation = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count(x => x.Response  == "Si") ?? 0
+            Latitude = surveyUser.Latitude,
+            Longitude = surveyUser.Longitude,
+            Evaluation = surveyUser.SurveyUserResponses?.Where(x => x.Question.QuestionTypeId != 4).Count(x => x.Response == "Si") ?? 0,
+            Distance = surveyUser.Distance ?? null,
+            AdministratorNameFilial = surveyUser.AdministratorNameFilial,
+            OwnerFilial = surveyUser.OwnerFilial,
+            StartDate = surveyUser.StartDate,
+            EndDate = surveyUser.EndDate
         };
     }
 
@@ -172,13 +181,38 @@ public class SurveyUsersServices : ISurveyUsersServices
         return (true, MapToSurveyUserResponseModel(item), null);
     }
 
-    public async Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state)
+    public async Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> UpdateSurveyUserState(int id, SurveyStates state, decimal? Latitude = null, decimal? Longitude = null)
     {
         var item = await _surveyUserRepository.GetAsync(x => x.Id == id);
         if (item == null) return (false, null, "No encontrado.");
 
         item.SurveyUserStateId = (int)state;
 
+        if (Latitude.HasValue)
+            item.Latitude = Latitude.Value;
+        if (Longitude.HasValue)
+            item.Longitude = Longitude.Value;
+
+        var startDate = item.StartDate;
+        if (!startDate.HasValue)
+            item.StartDate = DateTime.UtcNow;
+
+        if (Latitude.HasValue && Longitude.HasValue)
+            {
+                var filialResult = await _filialsServices.GetById(item.FilialId);
+                if (filialResult.success)
+                {
+                    var filial = filialResult.filial;
+                    if (filial.Lat.HasValue && filial.Lng.HasValue)
+                    {
+                        item.Distance = Convert.ToDecimal(CalcularDistancia(Latitude.Value, Longitude.Value, filial.Lat.Value, filial.Lng.Value));
+                    }
+                    else
+                    {
+                        item.Distance = null; // Si la filial no tiene coordenadas, se establece la distancia como nula.
+                    }
+                }
+            }
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
@@ -186,17 +220,40 @@ public class SurveyUsersServices : ISurveyUsersServices
         return (true, MapToSurveyUserResponseModel(item), null);
     }
 
-    public async Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(int id, int userId)
+    private double CalcularDistancia(decimal lat1, decimal lon1, decimal lat2, decimal lon2)
     {
-        var item = await _surveyUserRepository.GetAsync(x => x.Id == id);
+        const double R = 6371000; // Radio de la Tierra en metros
+        double ToRadians(double grados) => grados * Math.PI / 180;
+
+        double φ1 = ToRadians((double)lat1);
+        double φ2 = ToRadians((double)lat2);
+        double Δφ = ToRadians((double)(lat2 - lat1));
+        double Δλ = ToRadians((double)(lon2 - lon1));
+
+        double a = Math.Sin(Δφ / 2) * Math.Sin(Δφ / 2) +
+                   Math.Cos(φ1) * Math.Cos(φ2) *
+                   Math.Sin(Δλ / 2) * Math.Sin(Δλ / 2);
+
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        double distancia = R * c;
+        return distancia; // en metros
+    }
+
+    public async Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(FinishSurveyUserRequestModel model, int userId)
+    {
+        var item = await _surveyUserRepository.GetAsync(x => x.Id == model.Id);
         if (item == null) return (false, null, "No encontrado.");
 
         if (item.SurveyUserStateId != (int)SurveyStates.EnProgreso)
             return (false, null, "La encuesta no está en estado en progreso.");
 
         item.SurveyUserStateId = (int)SurveyStates.Finalizado;
+        item.AdministratorNameFilial = model.AdministratorNameFilial;
+        item.OwnerFilial = model.OwnerFilial;
         item.EditedAt = DateTime.UtcNow;
         item.EditedByUserId = userId;
+        item.EndDate = DateTime.UtcNow;
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
