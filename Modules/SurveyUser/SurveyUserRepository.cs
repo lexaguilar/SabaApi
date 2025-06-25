@@ -27,14 +27,14 @@ public class SurveyUserRepository : ISurveyUserRepository
     {
         return predicate == null
             ? _context.SurveyUsers
-                // .Include(x => x.User)
+                .Include(x => x.User)
                 .Include(x => x.Filial)
                 // .Include(x => x.SurveyUserState)
                 .Include(x => x.Survey)
                 .Include(x => x.SurveyUserResponses).ThenInclude(x => x.Question)
             .AsQueryable()
             : _context.SurveyUsers
-                // .Include(x => x.User)
+                .Include(x => x.User)
                 .Include(x => x.Filial)
                 // .Include(x => x.SurveyUserState)
                 .Include(x => x.Survey)

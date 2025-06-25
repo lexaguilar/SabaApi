@@ -15,7 +15,9 @@ public interface ISurveyUsersServices
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Remove(int id);
     Task<(bool success, SurveyUserResponseModel? survey, string? message)> FinishSurvey(FinishSurveyUserRequestModel model, int userId);
+    Task<(bool success, SurveyUserResponseModel? survey, string? message)> ResumeSurvey(FinishSurveyUserRequestModel model, int userId);
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, int total, string? message)> GetTotalCountByState(int? userId, int stateId);
 }
 
 public class SurveyUsersServices : ISurveyUsersServices
@@ -70,7 +72,7 @@ public class SurveyUsersServices : ISurveyUsersServices
     public async Task<(bool success, SurveyUserResponseModel? surveyUser, string? message)> Add(SurveyUserRequestModel m)
     {
 
-        if(m.SurveyUserStateId == 0)
+        if (m.SurveyUserStateId == 0)
             m.SurveyUserStateId = (int)SurveyStates.Pendiente;
 
         var surveyResult = await _surveysServices.GetById(m.SurveyId);
@@ -155,6 +157,12 @@ public class SurveyUsersServices : ISurveyUsersServices
 
                 if (filter.Key == "surveyId")
                     items = items.Where(x => x.SurveyId == int.Parse(filter.Value));
+
+                if (filter.Key == "filialId")
+                    items = items.Where(x => x.FilialId == int.Parse(filter.Value));
+
+                if (filter.Key == "surveyUserStateId")
+                    items = items.Where(x => x.SurveyUserStateId == int.Parse(filter.Value));
             }
         }
 
@@ -198,21 +206,21 @@ public class SurveyUsersServices : ISurveyUsersServices
             item.StartDate = DateTime.UtcNow;
 
         if (Latitude.HasValue && Longitude.HasValue)
+        {
+            var filialResult = await _filialsServices.GetById(item.FilialId);
+            if (filialResult.success)
             {
-                var filialResult = await _filialsServices.GetById(item.FilialId);
-                if (filialResult.success)
+                var filial = filialResult.filial;
+                if (filial.Lat.HasValue && filial.Lng.HasValue)
                 {
-                    var filial = filialResult.filial;
-                    if (filial.Lat.HasValue && filial.Lng.HasValue)
-                    {
-                        item.Distance = Convert.ToDecimal(CalcularDistancia(Latitude.Value, Longitude.Value, filial.Lat.Value, filial.Lng.Value));
-                    }
-                    else
-                    {
-                        item.Distance = null; // Si la filial no tiene coordenadas, se establece la distancia como nula.
-                    }
+                    item.Distance = Convert.ToDecimal(CalcularDistancia(Latitude.Value, Longitude.Value, filial.Lat.Value, filial.Lng.Value));
+                }
+                else
+                {
+                    item.Distance = null; // Si la filial no tiene coordenadas, se establece la distancia como nula.
                 }
             }
+        }
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
@@ -259,5 +267,37 @@ public class SurveyUsersServices : ISurveyUsersServices
         await _surveyUserRepository.SaveChangesAsync();
 
         return (true, MapToSurveyUserResponseModel(item), null);
+    }
+    
+    public async Task<(bool success, SurveyUserResponseModel? survey, string? message)> ResumeSurvey(FinishSurveyUserRequestModel model, int userId)
+    {
+        var item = await _surveyUserRepository.GetAsync(x => x.Id == model.Id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        if (item.SurveyUserStateId != (int)SurveyStates.Finalizado)
+            return (false, null, "La encuesta no está en estado finalizado.");
+
+        item.SurveyUserStateId = (int)SurveyStates.EnProgreso;
+        item.EditedAt = DateTime.UtcNow;
+        item.EditedByUserId = userId;
+
+        await _surveyUserRepository.UpdateAsync(item);
+        await _surveyUserRepository.SaveChangesAsync();
+
+        return (true, MapToSurveyUserResponseModel(item), null);
+    }
+
+    public async Task<(bool success, int total, string? message)> GetTotalCountByState(int? userId, int stateId)
+    {
+        
+        var totalCount = await _surveyUserRepository.GetAllAsync(x => x.SurveyUserStateId == stateId);
+
+        var total = 0;
+        if (userId.HasValue)        
+            total = totalCount.Count(x => x.UserId == userId.Value);        
+        else        
+            total = totalCount.Count();
+        
+        return (true, total, null);
     }
 }

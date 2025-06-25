@@ -152,18 +152,20 @@ public class RolesServices : IRolesServices
         if (role == null)
             return (false, null, "Rol no encontrado.");
         //remove all existing resources
-      
-        foreach (var resourceKey in model.ResourcesKey)
-        {
-            role.RoleResources.Add(new RoleResource
+        // var existingResources = role.RoleResources.ToArray();
+        // await _roleRepository.RemoveAsync(existingResources); // o _roleRepository.Remove(resource) si tu repo lo expone
+        await _roleRepository.RemoveAsync(role.Id);
+        await _roleRepository.SaveChangesAsync();
+
+        var newResources = model.ResourcesKey
+            .Select(resourceKey => new RoleResource
             {
                 ResourceKey = resourceKey,
                 Action = 1, // Assuming action is always 1 for this case
                 RoleId = role.Id
-            });
-        }
+            }).ToArray();
 
-        await _roleRepository.UpdateResourcesAsync(role.Id, role.RoleResources.ToArray());
+        await _roleRepository.UpdateResourcesAsync(role.Id, newResources);
         await _roleRepository.SaveChangesAsync();
         return (true, MapToRoleResponseModel(role), null);
     }

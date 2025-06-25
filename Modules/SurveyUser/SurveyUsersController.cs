@@ -66,11 +66,37 @@ public class SurveyUsersController : ControllerBase
         return Ok(surveyUser);
     }
 
+    [HttpGet("getTotalCountByState")]
+    public async Task<IActionResult> GetTotalCountByState(int stateId)
+    {
+        var user = this.GetUser();
+
+        if (user.RoleId != 1) // Assuming 1 is the Admin role
+        {
+            var (success, totalCount, message) = await _surveyUserServices.GetTotalCountByState(user.Id, stateId);
+            return Ok(totalCount);
+        }
+        else
+        {
+            var (success, totalCount, message) = await _surveyUserServices.GetTotalCountByState(null, stateId);
+            return Ok(totalCount);
+        }
+    }
+
     [HttpPost("{id}/FinishSurvey")]
     public async Task<IActionResult> FinishSurvey([FromBody] FinishSurveyUserRequestModel model)
     {
         var user = this.GetUser();
         var (success, survey, message) = await _surveyUserServices.FinishSurvey(model, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(survey);
+    }
+
+    [HttpPost("{id}/ResumeSurvey")]
+    public async Task<IActionResult> ResumeSurvey([FromBody] FinishSurveyUserRequestModel model)
+    {
+        var user = this.GetUser();
+        var (success, survey, message) = await _surveyUserServices.ResumeSurvey(model, user.Id);
         if (!success) return BadRequest(new { message });
         return Ok(survey);
     }

@@ -39,7 +39,7 @@ public static class ClaimPrincipalExtension
                 case ClaimTypes.Email:
                     usr.Email = claim.Value; break;
                 case ClaimTypes.Role:
-                    usr.Role = claim.Value; break;
+                    usr.RoleId = int.Parse(claim.Value); break;
                 case ClaimTypes.Actor:
                     usr.Id = int.Parse(claim.Value); break;
                 case ClaimTypes.Name:
