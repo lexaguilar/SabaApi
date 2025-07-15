@@ -22,5 +22,4 @@ public partial class GenericCatalog
     public bool Active { get; set; }
 
     public virtual CatalogName CatalogName { get; set; } = null!;
-
 }

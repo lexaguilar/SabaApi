@@ -23,8 +23,6 @@ public partial class Country
 
     public virtual ICollection<Filial> Filials { get; set; } = new List<Filial>();
 
-    public virtual ICollection<GenericCatalog> GenericCatalogs { get; set; } = new List<GenericCatalog>();
-
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
     public virtual ICollection<Survey> Surveys { get; set; } = new List<Survey>();

@@ -21,7 +21,7 @@ public partial class CatalogName
 
     public int CountryId { get; set; }
 
-    public virtual Country Country { get; set; }
+    public virtual Country Country { get; set; } = null!;
 
     public virtual ICollection<GenericCatalog> GenericCatalogs { get; set; } = new List<GenericCatalog>();
 

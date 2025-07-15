@@ -67,6 +67,7 @@ public partial class SabaContext : DbContext
 
             entity.HasOne(d => d.Country).WithMany(p => p.CatalogNames)
                 .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CatalogNames_Countries");
         });
 
@@ -118,7 +119,6 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<GenericCatalog>(entity =>
         {
-
             entity.Property(e => e.CatalogValue)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -129,7 +129,6 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.CatalogNameId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GenericCatalogs_CatalogNames");
-      
         });
 
         modelBuilder.Entity<QuestionType>(entity =>
