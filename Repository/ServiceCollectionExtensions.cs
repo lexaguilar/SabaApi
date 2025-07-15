@@ -15,8 +15,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFilialsServices, FilialsServices>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<ICatalogsServices, CatalogsServices>();
-        services.AddScoped<IClientRepository, ClientRepository>();
-        services.AddScoped<IClientsServices, ClientsServices>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRolesServices, RolesServices>();
         services.AddTransient<IMessageService, MessageService>();       
@@ -43,6 +41,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IResourcesServices, ResourcesServices>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IReportsServices, ReportsServices>();
+        services.AddScoped<ICountryRepository, CountryRepository>();
+        services.AddScoped<ICountriesServices, CountriesServices>();
         return services;
     }
 }

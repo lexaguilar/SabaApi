@@ -20,6 +20,9 @@ public class GenericCatalogsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
+        // var user = this.GetUser();
+        // filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
         var (success, genericCatalogs, message) = await _genericCatalogServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<GenericCatalogResponseModel>());
         return Ok(genericCatalogs);
@@ -28,7 +31,9 @@ public class GenericCatalogsController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
-        filters ??= new Dictionary<string, string>();
+        // var user = this.GetUser();
+        // filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
         filters.TryAdd("all-items", "true");
         var (success, genericCatalogs, message) = await _genericCatalogServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<GenericCatalogResponseModel>());

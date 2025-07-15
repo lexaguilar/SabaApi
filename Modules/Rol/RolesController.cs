@@ -19,7 +19,10 @@ public class RolesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int page = 0, int pageSize = 10)
     {
+        var user = this.GetUser();
         var filters = Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         var (success, roles, message) = await _rolesServices.GetAll(page, pageSize, filters);
 
         if (!success) return Ok(Array.Empty<FilialRequestModel>());
@@ -31,6 +34,19 @@ public class RolesController : ControllerBase
         });
     }
 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
+    {
+        var user = this.GetUser();
+
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
+        filters.TryAdd("all-items", "true");
+
+        var (success, roles, message) = await _rolesServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<RoleResponseModel>());
+        return Ok(roles.Items);
+    }
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

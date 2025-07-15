@@ -34,6 +34,7 @@ public class TemplatesServices : ITemplatesServices
         return new TemplateResponseModel
         {
             Id = template.Id,
+            CountryId = template.CountryId,
             TemplateCode = template.TemplateCode,
             Name = template.Name,
             Description = template.Description,
@@ -57,8 +58,9 @@ public class TemplatesServices : ITemplatesServices
            Name = m.Name,
            Description = m.Description,
            Active = m.Active,
-            CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = m.UserId
+           CreatedAt = DateTime.UtcNow,
+           CreatedByUserId = m.UserId,
+           CountryId = m.CountryId
         };
 
         await _templateRepository.AddAsync(newTemplate);
@@ -81,6 +83,7 @@ public class TemplatesServices : ITemplatesServices
         item.Active = m.Active;
         item.EditedAt = DateTime.UtcNow;
         item.EditedByUserId = m.UserId;
+        item.CountryId = m.CountryId;
 
         await _templateRepository.UpdateAsync(item);
         await _templateRepository.SaveChangesAsync();
@@ -135,6 +138,8 @@ public class TemplatesServices : ITemplatesServices
                     items = items.Where(x => x.TemplateCode != null && x.TemplateCode.Contains(filter.Value));
                 if (filter.Key == "name")
                     items = items.Where(x => x.Name.Contains(filter.Value));
+                if (filter.Key == "countryId")
+                    items = items.Where(x => x.CountryId == int.Parse(filter.Value));
             }
         }
 

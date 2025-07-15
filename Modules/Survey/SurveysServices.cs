@@ -44,6 +44,7 @@ public class SurveysServices : ISurveysServices
         return new SurveyResponseModel
         {
             Id = survey.Id,
+            CountryId = survey.CountryId,
             Name = survey.Name,
             TemplateId = survey.TemplateId,
             StartDate = survey.StartDate,
@@ -59,6 +60,8 @@ public class SurveysServices : ISurveysServices
             Active = survey.Active,
             Total = survey.SurveyUsers.Count,
             TotalCompleted = survey.SurveyUsers.Count(x => x.SurveyUserStateId == (int)SurveyStates.Finalizado),
+            StartedDate = survey.StartedDate,
+            FinishedDate = survey.FinishedDate,
         };
     }
 
@@ -70,6 +73,7 @@ public class SurveysServices : ISurveysServices
         var newSurvey = new Survey
         {
             Id = m.Id,
+            CountryId = m.CountryId,
             Name = m.Name,
             TemplateId = m.TemplateId,
             StartDate = m.StartDate,
@@ -84,33 +88,6 @@ public class SurveysServices : ISurveysServices
         };
 
         var questions = await _templateQuestionsServices.GetAll(0, 0, new Dictionary<string, string> { { "active", "true" }, { "templateId", m.TemplateId.ToString() } });
-
-        // if (newSurvey.ApplyAllUser)
-        // {
-
-        //     var filialUsers = await _filialUserRepository.GetAllAsync(x => x.User.IsActive && x.User.RoleId == 2);// Assuming roleId 2 is for supervisor users
-        //     foreach (var filialUser in filialUsers)
-        //     {
-        //         var surveyUserResponses = questions.templateQuestionResult.Items.Select(q => new SurveyUserResponse
-        //         {
-        //             QuestionId = q.Id,
-        //             Response = "",
-        //             CompletedAt = null // Initially null, to be filled when the user completes the survey
-        //         }).ToList();
-
-        //         newSurvey.SurveyUsers.Add(new SurveyUser
-        //         {
-        //             UserId = filialUser.UserId,
-        //             SurveyId = newSurvey.Id,
-        //             FilialId = filialUser.FilialId,
-        //             SurveyUserStateId = 1, //Pending
-        //             Observation = "",
-        //             CreatedByUserId = m.UserId,
-        //             CreatedAt = DateTime.UtcNow,
-        //             SurveyUserResponses = surveyUserResponses
-        //         });
-        //     }
-        // }
 
         await _surveyRepository.AddAsync(newSurvey);
         await _surveyRepository.SaveChangesAsync();
@@ -127,6 +104,7 @@ public class SurveysServices : ISurveysServices
         if (existing != null) return (false, null, "Ya existe un survey con ese nombre.");
 
         item.Name = m.Name;
+        item.CountryId = m.CountryId;
         item.TemplateId = m.TemplateId;
         item.StartDate = m.StartDate;
         item.EndDate = m.EndDate;
@@ -189,6 +167,8 @@ public class SurveysServices : ISurveysServices
                     items = items.Where(x => x.TemplateId == int.Parse(filter.Value));
                 if (filter.Key == "active" && bool.TryParse(filter.Value, out bool isActive))
                     items = items.Where(x => x.Active == isActive);
+                if (filter.Key == "countryId" && int.TryParse(filter.Value, out int countryId))
+                    items = items.Where(x => x.CountryId == countryId);
             }
         }
 

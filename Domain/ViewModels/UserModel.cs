@@ -6,6 +6,8 @@ namespace Saba.Domain.ViewModels;
 public partial class UserRequestModel
 {
     public int Id { get; set; }
+    public int CountryId { get; set; }
+    
 
     public string UserName { get; set; } = null!;
 
@@ -23,10 +25,11 @@ public partial class UserRequestModel
 
 }
 
-public partial class UserResponseModel:UserRequestModel
+public partial class UserResponseModel : UserRequestModel
 {
     public DateTime CreateDate { get; set; }
     public DateTime LastLoginDate { get; set; }
+    public string CountryName { get; set; }
 
 }
 

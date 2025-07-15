@@ -4,6 +4,7 @@ namespace Saba.Application.Extensions;
 
 public static class ObjectExtensions
 {
+    private static readonly string paisesViewAll = "Paises:ViewAll";
     public static TTarget CopyFrom<TSource, TTarget>(this TTarget target, TSource source)
     {
         var sourceProps = typeof(TSource).GetProperties();
@@ -39,7 +40,26 @@ public static class ObjectExtensions
         }
 
         return target;
-        
-    }     
-    
+
+    }
+
+
+    public static bool HasResource(string[] resources, string resource)
+    {
+        return resources?.Any(r => r == resource) ?? false;
+    }
+
+    public static Dictionary<string, string> AddCountry(Dictionary<string, string> filters, string[] resources, int userCountryId)
+    {
+        filters ??= new Dictionary<string, string>();
+
+        if (!HasResource(resources, "Paises:ViewAll"))
+        {
+            if (filters.ContainsKey("countryId"))
+                filters.Remove("countryId");
+            filters.Add("countryId", userCountryId.ToString());       
+        }
+
+        return filters;
+    }
 }

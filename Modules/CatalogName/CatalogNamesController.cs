@@ -18,8 +18,11 @@ public class CatalogNamesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
         var (success, catalogNames, message) = await _catalogNameServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<CatalogNameResponseModel>());
         return Ok(catalogNames);

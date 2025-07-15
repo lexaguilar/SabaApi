@@ -21,6 +21,10 @@ public partial class Role
 
     public int? EditedByUserId { get; set; }
 
+    public int CountryId { get; set; }
+
+    public virtual Country Country { get; set; } = null!;
+
     public virtual ICollection<RoleResource> RoleResources { get; set; } = new List<RoleResource>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();

@@ -31,6 +31,7 @@ public class RolesServices : IRolesServices
         return new RoleResponseModel
         {
             Id = role.Id,
+            CountryId = role.CountryId,
             Name = role.Name,
             Description = role.Description,
             Active = role.Active,
@@ -60,7 +61,8 @@ public class RolesServices : IRolesServices
             Description = m.Description,
             Active = m.Active,
             CreatedAt = DateTime.UtcNow,
-            CreatedByUserId = m.UserId
+            CreatedByUserId = m.UserId,
+            CountryId = m.CountryId
         };
 
         await _roleRepository.AddAsync(newRole);
@@ -79,6 +81,7 @@ public class RolesServices : IRolesServices
         role.Active = m.Active;
         role.EditedAt = DateTime.UtcNow;
         role.EditedByUserId = m.UserId;
+        role.CountryId = m.CountryId;
 
         await _roleRepository.UpdateAsync(role);
         await _roleRepository.SaveChangesAsync();
@@ -123,10 +126,21 @@ public class RolesServices : IRolesServices
                 {
                     roles = roles.Where(x => x.Active == act);
                 }
+                else if (filter.Key == "countryId" && int.TryParse(filter.Value, out int countryId))
+                {
+                    roles = roles.Where(x => x.CountryId == countryId);
+                }
             }
         }
 
         var totalCount = roles.Count();
+
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        {
+            page = 0;
+            pageSize = totalCount;
+        }
+        
         roles = roles.Skip(page).Take(pageSize);
 
         var rolePageResponseModel = new RolePageResponseModel

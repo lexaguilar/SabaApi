@@ -72,7 +72,7 @@ public class GenericCatalogsServices : IGenericCatalogsServices
         var existing = await _genericCatalogRepository.GetAsync(x => x.CatalogValue == m.CatalogValue);
         if (existing != null) return (false, null, "Ya existe un genericcatalog con ese nombre.");
 
-        item.CatalogNameId = m.CatalogNameId;
+        item.CatalogNameId = m.CatalogNameId;        
         item.CatalogValue = m.CatalogValue;
         item.Active = m.Active;
         item.EditedAt = DateTime.UtcNow;
@@ -122,7 +122,7 @@ public class GenericCatalogsServices : IGenericCatalogsServices
                 if (filter.Key == "catalogNameId")
                     items = items.Where(x => x.CatalogNameId == int.Parse(filter.Value));
                 if (filter.Key == "catalogValue")
-                    items = items.Where(x => x.CatalogValue.Contains(filter.Value));
+                    items = items.Where(x => x.CatalogValue.Contains(filter.Value));             
             }
         }
 

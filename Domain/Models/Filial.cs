@@ -27,6 +27,10 @@ public partial class Filial
 
     public int? EditedByUserId { get; set; }
 
+    public int CountryId { get; set; }
+
+    public virtual Country Country { get; set; } = null!;
+
     public virtual ICollection<FilialUser> FilialUsers { get; set; } = new List<FilialUser>();
 
     public virtual ICollection<SurveyUser> SurveyUsers { get; set; } = new List<SurveyUser>();

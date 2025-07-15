@@ -34,6 +34,7 @@ public class FilialsServices : IFilialsServices
         return new FilialResponseModel
         {
             Id = filial.Id,
+            CountryId = filial.CountryId,
             InternalCode = filial.InternalCode,
             Name = filial.Name,
             Address = filial.Address,
@@ -49,12 +50,13 @@ public class FilialsServices : IFilialsServices
 
     public async Task<(bool success, FilialResponseModel? filial, string? message)> Add(FilialRequestModel m)
     {
-        var existing = await _filialRepository.GetAsync(x => x.Name == m.Name);
-        if (existing != null) return (false, null, "Ya existe un filial con ese nombre.");
+        var existing = await _filialRepository.GetAsync(x => x.CountryId == m.CountryId && x.Name == m.Name);
+        if (existing != null) return (false, null, "Ya existe un filial con ese nombre en este país.");
 
         var newFilial = new Filial
         {
             Id = m.Id,
+            CountryId = m.CountryId,
             InternalCode = m.InternalCode,
             Name = m.Name,
             Address = m.Address,
@@ -76,10 +78,11 @@ public class FilialsServices : IFilialsServices
         var item = await _filialRepository.GetAsync(x => x.Id == m.Id);
         if (item == null) return (false, null, "No encontrado.");
 
-        var existing = await _filialRepository.GetAsync(x => x.Name == m.Name && x.Id != m.Id);
-        if (existing != null) return (false, null, "Ya existe un filial con ese nombre.");
+        var existing = await _filialRepository.GetAsync(x => x.CountryId == m.CountryId && x.Name == m.Name && x.Id != m.Id);
+        if (existing != null) return (false, null, "Ya existe un filial con ese nombre en este país.");
 
         item.InternalCode = m.InternalCode;
+        item.CountryId = m.CountryId;
         item.Name = m.Name;
         item.Address = m.Address;
         item.Lat = m.Lat;
@@ -142,10 +145,19 @@ public class FilialsServices : IFilialsServices
                     items = items.Where(x => x.Name.Contains(filter.Value));
                 if (filter.Key == "active" && bool.TryParse(filter.Value, out bool isActive))
                     items = items.Where(x => x.Active == isActive);
+                if (filter.Key == "countryId" && int.TryParse(filter.Value, out int countryId))
+                    items = items.Where(x => x.CountryId == countryId);
             }
         }
 
         var totalCount = items.Count();
+
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        {
+            page = 0;
+            pageSize = totalCount;
+        }
+
         items = items.Skip(page).Take(pageSize);
         var list = items.ToList().Select(x => MapToFilialResponseModel(x));
 

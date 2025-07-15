@@ -21,6 +21,9 @@ public class FilialsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
         if (!success)
             return Ok(Array.Empty<TemplateResponseModel>());
@@ -29,6 +32,20 @@ public class FilialsController : ControllerBase
             items = filials.Items,
             totalCount = filials.TotalCount
         });
+    }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    {
+        var user = this.GetUser();
+
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
+        filters.TryAdd("all-items", "true");
+
+        var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<FilialResponseModel>());
+        return Ok(filials.Items);
     }
 
     [HttpGet("{id}")]

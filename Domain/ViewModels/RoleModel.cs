@@ -3,6 +3,7 @@ namespace Saba.Domain.ViewModels;
 public class RoleRequestModel
 {
     public int Id { get; set; }
+    public int CountryId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public bool Active { get; set; }

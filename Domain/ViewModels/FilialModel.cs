@@ -5,7 +5,8 @@ namespace Saba.Domain.ViewModels;
 public partial class FilialRequestModel
 {
     public int Id { get; set; } 
-    public string InternalCode { get; set; } =null!;
+    public int CountryId { get; set; }
+    public string InternalCode { get; set; } = null!;
     public string Name { get; set; } =null!;
     public string? Address { get; set; } 
     public decimal? Lat { get; set; } 

@@ -17,7 +17,7 @@ public partial class SabaContext : DbContext
 
     public virtual DbSet<CatalogName> CatalogNames { get; set; }
 
-    public virtual DbSet<Client> Clients { get; set; }
+    public virtual DbSet<Country> Countries { get; set; }
 
     public virtual DbSet<Filial> Filials { get; set; }
 
@@ -64,16 +64,15 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Country).WithMany(p => p.CatalogNames)
+                .HasForeignKey(d => d.CountryId)
+                .HasConstraintName("FK_CatalogNames_Countries");
         });
 
-        modelBuilder.Entity<Client>(entity =>
+        modelBuilder.Entity<Country>(entity =>
         {
-            entity.Property(e => e.Address)
-                .HasMaxLength(250)
-                .IsUnicode(false);
-            entity.Property(e => e.Amount).HasColumnType("money");
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.DateAdded).HasColumnType("datetime");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
@@ -82,6 +81,8 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<Filial>(entity =>
         {
+            entity.HasIndex(e => e.CountryId, "IX_Filials");
+
             entity.Property(e => e.Address)
                 .HasMaxLength(250)
                 .IsUnicode(false);
@@ -95,6 +96,11 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Filials)
+                .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Filials_Countries");
         });
 
         modelBuilder.Entity<FilialUser>(entity =>
@@ -112,6 +118,7 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<GenericCatalog>(entity =>
         {
+
             entity.Property(e => e.CatalogValue)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -122,6 +129,7 @@ public partial class SabaContext : DbContext
                 .HasForeignKey(d => d.CatalogNameId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GenericCatalogs_CatalogNames");
+      
         });
 
         modelBuilder.Entity<QuestionType>(entity =>
@@ -158,6 +166,8 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
+            entity.HasIndex(e => e.CountryId, "IX_Roles");
+
             entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Description)
@@ -167,6 +177,11 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Roles)
+                .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Roles_Countries");
         });
 
         modelBuilder.Entity<RoleResource>(entity =>
@@ -191,6 +206,8 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<Survey>(entity =>
         {
+            entity.HasIndex(e => e.CountryId, "IX_Surveys");
+
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.EditedAt).HasColumnType("datetime");
             entity.Property(e => e.EndDate).HasColumnType("datetime");
@@ -200,6 +217,11 @@ public partial class SabaContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.StartedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Surveys)
+                .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Surveys_Countries");
 
             entity.HasOne(d => d.SurveyState).WithMany(p => p.Surveys)
                 .HasForeignKey(d => d.SurveyStateId)
@@ -323,6 +345,8 @@ public partial class SabaContext : DbContext
 
         modelBuilder.Entity<Template>(entity =>
         {
+            entity.HasIndex(e => e.CountryId, "IX_Templates");
+
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Description)
                 .HasMaxLength(150)
@@ -334,6 +358,11 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.TemplateCode)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Templates)
+                .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Templates_Countries");
         });
 
         modelBuilder.Entity<TemplateQuestion>(entity =>
@@ -360,6 +389,8 @@ public partial class SabaContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Memberships");
 
+            entity.HasIndex(e => e.CountryId, "IX_Users");
+
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FailedPasswordAttemptWindowStart).HasColumnType("datetime");
@@ -385,6 +416,11 @@ public partial class SabaContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Users)
+                .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Users_Countries");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)

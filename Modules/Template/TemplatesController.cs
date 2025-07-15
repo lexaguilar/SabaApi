@@ -20,6 +20,9 @@ public class TemplatesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         var (success, templates, message) = await _templateServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<TemplateResponseModel>());
         return Ok(templates);
@@ -30,7 +33,9 @@ public class TemplatesController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        filters ??= new Dictionary<string, string>();
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
         filters.TryAdd("all-items", "true");
 
         var (success, templates, message) = await _templateServices.GetAll(skip, take, filters);

@@ -23,8 +23,11 @@ public class CatalogNamesServices : ICatalogNamesServices
     private readonly ICatalogNameRepository _catalogNameRepository;
     private readonly AppSettings _appSettings;
 
-    public CatalogNamesServices(ICatalogNameRepository catalogNameRepository, IOptions<AppSettings> appSettings)
+    private readonly IUsersServices _usersServices;
+
+    public CatalogNamesServices(ICatalogNameRepository catalogNameRepository, IOptions<AppSettings> appSettings, IUsersServices usersServices)
     {
+        _usersServices = usersServices;
         _appSettings = appSettings.Value;
         _catalogNameRepository = catalogNameRepository;
     }
@@ -34,6 +37,7 @@ public class CatalogNamesServices : ICatalogNamesServices
         return new CatalogNameResponseModel
         {
             Id = catalogName.Id,
+            CountryId = catalogName.CountryId,
             Name = catalogName.Name,
             CreatedAt = catalogName.CreatedAt,
             CreatedByUserId = catalogName.CreatedByUserId,
@@ -50,9 +54,10 @@ public class CatalogNamesServices : ICatalogNamesServices
 
         var newCatalogName = new CatalogName
         {
-           Id = m.Id,
-           Name = m.Name,
-           Active = m.Active,
+            Id = m.Id,
+            CountryId = m.CountryId,
+            Name = m.Name,
+            Active = m.Active,
             CreatedAt = DateTime.UtcNow,
             CreatedByUserId = m.UserId
         };
@@ -72,6 +77,7 @@ public class CatalogNamesServices : ICatalogNamesServices
         if (existing != null) return (false, null, "Ya existe un catalogname con ese nombre.");
 
         item.Name = m.Name;
+        item.CountryId = m.CountryId;
         item.Active = m.Active;
         item.EditedAt = DateTime.UtcNow;
         item.EditedByUserId = m.UserId;
@@ -106,24 +112,26 @@ public class CatalogNamesServices : ICatalogNamesServices
     {
         var item = await _catalogNameRepository.GetAsync(x => x.Name == userName);
         if (item == null) return (false, null, "No encontrado.");
-        return (true, MapToCatalogNameResponseModel (item), null);
+        return (true, MapToCatalogNameResponseModel(item), null);
     }
 
-    public async Task<(bool success, CatalogNameResponseModel ? catalogName, string? message)> GetById(int id)
+    public async Task<(bool success, CatalogNameResponseModel? catalogName, string? message)> GetById(int id)
     {
         var item = await _catalogNameRepository.GetAsync(x => x.Id == id);
         if (item == null) return (false, null, "No encontrado.");
-        return (true, MapToCatalogNameResponseModel (item), null);
+        return (true, MapToCatalogNameResponseModel(item), null);
     }
 
     public async Task<(bool success, CatalogNamePageResponseModel catalogNameResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null)
     {
-        var items = await _catalogNameRepository.GetAllAsync();
-
+        var items = await _catalogNameRepository.GetAllAsync();        
+        
         if (filters != null && filters.Count > 0)
         {
             foreach (var filter in filters)
             {
+                  if (filter.Key == "countryId")
+                    items = items.Where(x => x.CountryId == int.Parse(filter.Value));
             }
         }
 

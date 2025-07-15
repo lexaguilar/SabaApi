@@ -39,6 +39,10 @@ public partial class User
 
     public DateTime TempTokenExpiration { get; set; }
 
+    public int CountryId { get; set; }
+
+    public virtual Country Country { get; set; } = null!;
+
     public virtual ICollection<FilialUser> FilialUsers { get; set; } = new List<FilialUser>();
 
     public virtual Role Role { get; set; } = null!;

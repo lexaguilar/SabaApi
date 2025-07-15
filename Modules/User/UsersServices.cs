@@ -45,6 +45,8 @@ public class UsersServices : IUsersServices
         return new UserResponseModel
         {
             Id = user.Id,
+            CountryId = user.CountryId,
+            CountryName = user.Country.Name,
             UserName = user.UserName,
             RoleId = user.RoleId,
             Name = user.Name,
@@ -66,7 +68,8 @@ public class UsersServices : IUsersServices
 
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var (pass, salt) = CryptoHelper.ComputePassword(password);
-        var newUser = new User{
+        var newUser = new User
+        {
             UserName = m.UserName,
             RoleId = m.RoleId,
             Name = m.Name,
@@ -83,7 +86,16 @@ public class UsersServices : IUsersServices
             FailedPasswordAttemptWindowStart = DateTime.UtcNow,
             TempToken = null,
             TempTokenExpiration = DateTime.UtcNow,
+            CountryId = m.CountryId
         };
+
+        //validate if the country user has filials same as the user country
+        for (int i = 0; i < m.FilialIds.Length; i++)
+        {
+            var filial = await _filialRepository.GetAsync(x => x.Id == m.FilialIds[i]);
+            if (filial == null || filial.CountryId != m.CountryId)
+                return (false, null, "Algunas filiales no pertenecen al país del usuario.");
+        }
 
         if (m.FilialIds != null && m.FilialIds.Length > 0)
         {
@@ -100,9 +112,9 @@ public class UsersServices : IUsersServices
 
         await _userRepository.AddAsync(newUser);
         await _userRepository.SaveChangesAsync();
-        
+
         var message = new MimeMessage
-        {               
+        {
             To = { new MailboxAddress(m.Name, m.Email) }
         };
 
@@ -133,7 +145,7 @@ public class UsersServices : IUsersServices
         return (true, null, null);
     }
 
-    public async Task<(bool success, UserResponseModel? user, string? message)> Enable(int id)    
+    public async Task<(bool success, UserResponseModel? user, string? message)> Enable(int id)
     {
         var user = await _userRepository.GetAsync(x => x.Id == id);
         if (user == null)
@@ -156,7 +168,7 @@ public class UsersServices : IUsersServices
             foreach (var filter in filters)
             {
                 var value = filter.Value.ToLower();
-                if(filter.Key == "userName")
+                if (filter.Key == "userName")
                     users = users.Where(x => x.UserName.ToLower().StartsWith(value));
 
                 if (filter.Key == "email")
@@ -170,19 +182,21 @@ public class UsersServices : IUsersServices
 
                 if (filter.Key == "roleId")
                     if (int.TryParse(value, out var roleId))
-                        users = users.Where(x => x.RoleId == roleId);                
+                        users = users.Where(x => x.RoleId == roleId);
 
-                if (filter.Key == "isActive")                
+                if (filter.Key == "isActive")
                     if (bool.TryParse(value, out var isActive))
                         users = users.Where(x => x.IsActive == isActive);
-                
+                        
+                if (filter.Key == "countryId" && int.TryParse(value, out int countryId))
+                    users = users.Where(x => x.CountryId == countryId);
 
             }
         }
 
-        var totalCount = users.Count();       
+        var totalCount = users.Count();
 
-         if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
         {
             page = 0;
             pageSize = totalCount;
@@ -209,7 +223,7 @@ public class UsersServices : IUsersServices
             return (false, null, "User not found");
 
         var userModel = MapToUserResponseModel(user);
-        
+
         return (true, userModel, null);
 
     }
@@ -237,11 +251,12 @@ public class UsersServices : IUsersServices
         user.LastName = m.LastName;
         user.Email = m.Email;
         user.IsActive = m.IsActive;
+        user.CountryId = m.CountryId;
 
         if (m.FilialIds != null && m.FilialIds.Length > 0)
         {
-            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
-            user.FilialUsers.Clear();
+            await _userRepository.MarkFilialsAsDeleted(user);
+            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));           
             foreach (var filial in filials)
             {
                 user.FilialUsers.Add(new FilialUser

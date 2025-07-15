@@ -15,13 +15,16 @@ namespace Saba.Domain.ViewModels
      
     }
 
-    public class UserModel{
+    public class UserModel
+    {
         public int Id { get; set; }
         public string Role { get; set; } = null!;
         public int RoleId { get; set; }
         public string UserName { get; set; } = null!;
         public string DisplayName { get; set; } = null!;
         public string Email { get; set; } = null!;
+        public int CountryId { get; set; }
+        public string CountryName { get; set; } = null!;
     
     }
 

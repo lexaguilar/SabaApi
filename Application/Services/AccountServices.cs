@@ -150,6 +150,8 @@ public class AccountService : IAccountService
             RoleId = user.RoleId,
             UserName = user.UserName,
             Email = user.Email,
+            CountryId = user.CountryId,
+            CountryName = user.Country.Name
         };
 
         var userReponse = new LoginModelReponse

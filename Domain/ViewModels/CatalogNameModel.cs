@@ -5,6 +5,7 @@ namespace Saba.Domain.ViewModels;
 public partial class CatalogNameRequestModel
 {
     public int Id { get; set; } 
+    public int CountryId { get; set; }
     public string Name { get; set; } = null!;
     public bool Active { get; set; } 
     [NotMapped]

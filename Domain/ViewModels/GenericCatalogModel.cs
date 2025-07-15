@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Saba.Domain.Models;
 
 namespace Saba.Domain.ViewModels;
 

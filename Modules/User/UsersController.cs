@@ -2,6 +2,7 @@ namespace Saba.Infrastructure.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Saba.Application.Extensions;
 using Saba.Application.Services;
 using Saba.Domain.ViewModels;
 
@@ -20,6 +21,9 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         var (success, users, message) = await _usersServices.GetAll(skip, take, filters);
         if (!success)
             return Ok(Array.Empty<UserResponseModel>());
@@ -33,7 +37,9 @@ public class UsersController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        filters ??= new Dictionary<string, string>();
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         filters.TryAdd("all-items", "true");
 
         var (success, templates, message) = await _usersServices.GetAll(skip, take, filters);

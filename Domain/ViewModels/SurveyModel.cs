@@ -5,6 +5,7 @@ namespace Saba.Domain.ViewModels;
 public partial class SurveyRequestModel
 {
     public int Id { get; set; } 
+    public int CountryId { get; set; } 
     public string Name { get; set; } = null!;
     public int TemplateId { get; set; } 
     public DateTime? StartDate { get; set; } 

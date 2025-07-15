@@ -14,4 +14,5 @@ public partial class GenericCatalog : ICatalogo { }
 public partial class SurveyState : ICatalogo { }
 public partial class SurveyUserState : ICatalogo { }
 public partial class User : ICatalogo { }
+public partial class Country : ICatalogo { }
 
