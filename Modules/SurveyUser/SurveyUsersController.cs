@@ -20,9 +20,25 @@ public class SurveyUsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
         var (success, surveyUsers, message) = await _surveyUserServices.GetAll(skip, take, filters);
         if (!success) return Ok(Array.Empty<SurveyUserResponseModel>());
         return Ok(surveyUsers);
+    }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
+    {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
+        filters.TryAdd("all-items", "true");
+
+        var (success, surveyUsers, message) = await _surveyUserServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<SurveyUserResponseModel>());
+        return Ok(surveyUsers.Items);
     }
 
     [HttpGet("{id}")]
@@ -71,7 +87,7 @@ public class SurveyUsersController : ControllerBase
     {
         var user = this.GetUser();
 
-        if (user.RoleId != 1) // Assuming 1 is the Admin role
+        if (!user.IsAdmin) // Assuming 1 is the Admin role
         {
             var (success, totalCount, message) = await _surveyUserServices.GetTotalCountByState(user.Id, stateId);
             return Ok(totalCount);
@@ -99,5 +115,15 @@ public class SurveyUsersController : ControllerBase
         var (success, survey, message) = await _surveyUserServices.ResumeSurvey(model, user.Id);
         if (!success) return BadRequest(new { message });
         return Ok(survey);
+    }
+
+    [HttpGet("issues-found")]
+    public async Task<IActionResult> IssuesFound([FromQuery] int countryId, [FromQuery] DateTime date)
+    {
+        var issues = await _surveyUserServices.GetIssuesFoundAsync(countryId, date);
+        if (issues == null || !issues.Any())
+            return Ok(Array.Empty<SurveyUserIssuesResponseModel>());
+
+        return Ok(issues);
     }
 }

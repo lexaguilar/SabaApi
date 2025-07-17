@@ -145,6 +145,7 @@ public class AccountService : IAccountService
         var userModel = new UserModel
         {
             Id = user.Id,
+            IsAdmin = user.IsAdmin ?? false,
             DisplayName = user.UserName,
             Role = user.Role.Name,
             RoleId = user.RoleId,

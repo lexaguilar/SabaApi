@@ -50,3 +50,11 @@ public partial class FinishSurveyUserRequestModel
     public string AdministratorNameFilial { get; set; } = string.Empty;
     public string OwnerFilial { get; set; } = string.Empty;
 }
+
+public partial class SurveyUserIssuesResponseModel
+{
+    public int FilialId { get; set; }
+    public string FilialName { get; set; } 
+    public int Issues { get; set; } 
+    
+}

@@ -25,6 +25,7 @@ namespace Saba.Domain.ViewModels
         public string Email { get; set; } = null!;
         public int CountryId { get; set; }
         public string CountryName { get; set; } = null!;
+        public bool IsAdmin { get; set; } = false;
     
     }
 

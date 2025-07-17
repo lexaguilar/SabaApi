@@ -28,6 +28,19 @@ public class CatalogNamesController : ControllerBase
         return Ok(catalogNames);
     }
 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    {
+        var user = this.GetUser();
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+
+        filters.TryAdd("all-items", "true");
+
+        var (success, catalogNames, message) = await _catalogNameServices.GetAll(skip, take, filters);
+        if (!success) return Ok(Array.Empty<CatalogNameResponseModel>());
+        return Ok(catalogNames.Items);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

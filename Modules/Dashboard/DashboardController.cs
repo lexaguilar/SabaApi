@@ -25,12 +25,18 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> Users()
+    public async Task<IActionResult> Users([FromQuery] int countryId)
     {
-        var dictionary = new Dictionary<string, string>
+        var user = this.GetUser();
+
+        var dictionary = new Dictionary<string, string>()
         {
-            { "all-items", "true" }
+            { "countryId", countryId.ToString() }
         };
+
+        dictionary = ObjectExtensions.AddCountry(dictionary, user.Resources, user.CountryId);        
+        dictionary.TryAdd("all-items", "true");
+
         var (success, users, message) = await _usersServices.GetAll(0, 0, dictionary);
         if (!success)
             return NotFound(new { message });
@@ -38,7 +44,7 @@ public class DashboardController : ControllerBase
         return Ok(new
         {
             Name = "Supervisores",
-            Value = users.Items.Count(u => u.RoleId != 1),
+            Value = users.Items.Count(u => u.IsAdmin != true),
             Extra = new
             {
                 Name = "Total Usuarios",
@@ -48,12 +54,17 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("filials")]
-    public async Task<IActionResult> Filials()
+    public async Task<IActionResult> Filials([FromQuery] int countryId)
     {
-        var dictionary = new Dictionary<string, string>
+        var user = this.GetUser();
+
+        var dictionary = new Dictionary<string, string>()
         {
-            { "all-items", "true" }
+            { "countryId", countryId.ToString() }
         };
+
+        dictionary = ObjectExtensions.AddCountry(dictionary, user.Resources, user.CountryId);        
+        dictionary.TryAdd("all-items", "true");
         var (success, filials, message) = await _filialsServices.GetAll(0, 1000, dictionary);
         if (!success)
             return NotFound(new { message });
@@ -71,12 +82,18 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("surveys")]
-    public async Task<IActionResult> Surveys()
+    public async Task<IActionResult> Surveys([FromQuery] int countryId)
     {
-        var dictionary = new Dictionary<string, string>
+        var user = this.GetUser();
+
+        var dictionary = new Dictionary<string, string>()
         {
-            { "all-items", "true" }
+            { "countryId", countryId.ToString() }
         };
+
+        dictionary = ObjectExtensions.AddCountry(dictionary, user.Resources, user.CountryId);        
+        dictionary.TryAdd("all-items", "true");
+
         var (success, surveys, message) = await _surveysServices.GetAll(0, 1000, dictionary);
         if (!success)
             return NotFound(new { message });
@@ -94,12 +111,18 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("survey-users")]
-    public async Task<IActionResult> SurveyUsers()
+    public async Task<IActionResult> SurveyUsers([FromQuery] int countryId)
     {
-        var dictionary = new Dictionary<string, string>
+        var user = this.GetUser();
+
+        var dictionary = new Dictionary<string, string>()
         {
-            { "all-items", "true" }
+            { "countryId", countryId.ToString() }
         };
+
+        dictionary = ObjectExtensions.AddCountry(dictionary, user.Resources, user.CountryId);        
+        dictionary.TryAdd("all-items", "true");
+
         var (success, surveyUsers, message) = await _surveyUsersServices.GetAll(0, 1000, dictionary);
         if (!success)
             return NotFound(new { message });

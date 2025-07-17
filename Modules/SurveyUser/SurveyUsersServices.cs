@@ -18,6 +18,7 @@ public interface ISurveyUsersServices
     Task<(bool success, SurveyUserResponseModel? survey, string? message)> ResumeSurvey(FinishSurveyUserRequestModel model, int userId);
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
     Task<(bool success, int total, string? message)> GetTotalCountByState(int? userId, int stateId);
+    Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date);
 }
 
 public class SurveyUsersServices : ISurveyUsersServices
@@ -163,6 +164,17 @@ public class SurveyUsersServices : ISurveyUsersServices
 
                 if (filter.Key == "surveyUserStateId")
                     items = items.Where(x => x.SurveyUserStateId == int.Parse(filter.Value));
+
+                if (filter.Key == "countryId")
+                    items = items.Where(x => x.Survey.CountryId == int.Parse(filter.Value));
+
+                if (filter.Key == "reportDate" && DateTime.TryParse(filter.Value, out DateTime reportDate))
+                {
+                    var year = reportDate.Year;
+                    var month = reportDate.Month;
+
+                    items = items.Where(x => x.CreatedAt.Year == year && x.CreatedAt.Month == month);
+                }
             }
         }
 
@@ -299,5 +311,10 @@ public class SurveyUsersServices : ISurveyUsersServices
             total = totalCount.Count();
         
         return (true, total, null);
+    }
+
+    public Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date)
+    {
+        return _surveyUserRepository.GetIssuesFoundAsync(countryId, date);
     }
 }

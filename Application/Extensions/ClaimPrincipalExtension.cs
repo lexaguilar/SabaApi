@@ -19,7 +19,8 @@ public static class ClaimPrincipalExtension
                 new Claim(ClaimTypes.Actor, m.User.Id.ToString()),
                 new Claim(AppClaimTypes.Resources, m.AccessResources),
                 new Claim(AppClaimTypes.CountryId, m.User.CountryId.ToString()),
-                new Claim(AppClaimTypes.CountryName, m.User.CountryName)
+                new Claim(AppClaimTypes.CountryName, m.User.CountryName),
+                new Claim(AppClaimTypes.IsAdmin, m.User.IsAdmin.ToString())
              };
 
         var claimsIdentity = new ClaimsIdentity(claims, authenticationScheme);
@@ -55,7 +56,8 @@ public static class ClaimPrincipalExtension
                         break;
                     case AppClaimTypes.CountryName:
                         usr.CountryName = claim.Value;  break;
-                    
+                    case AppClaimTypes.IsAdmin:
+                        usr.IsAdmin = bool.Parse(claim.Value); break;
                 }
             }
         }
@@ -72,6 +74,7 @@ public static class ClaimPrincipalExtension
         public string UserName { get; set; }
         public string Email { get; set; }
         public string[] Resources { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     public class AppClaimTypes
@@ -79,5 +82,6 @@ public static class ClaimPrincipalExtension
         internal const string Resources = "Resources";
         internal const string CountryId = "CountryId";
         internal const string CountryName = "CountryName";
+        internal const string IsAdmin = "IsAdmin";
     }
 }

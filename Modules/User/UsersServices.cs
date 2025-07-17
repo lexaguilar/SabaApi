@@ -49,6 +49,7 @@ public class UsersServices : IUsersServices
             CountryName = user.Country.Name,
             UserName = user.UserName,
             RoleId = user.RoleId,
+            IsAdmin = user.IsAdmin ?? false,
             Name = user.Name,
             LastName = user.LastName,
             Email = user.Email,
@@ -72,6 +73,7 @@ public class UsersServices : IUsersServices
         {
             UserName = m.UserName,
             RoleId = m.RoleId,
+            IsAdmin = m.IsAdmin,
             Name = m.Name,
             LastName = m.LastName,
             Email = m.Email,
@@ -252,11 +254,12 @@ public class UsersServices : IUsersServices
         user.Email = m.Email;
         user.IsActive = m.IsActive;
         user.CountryId = m.CountryId;
+        user.IsAdmin = m.IsAdmin;
 
         if (m.FilialIds != null && m.FilialIds.Length > 0)
         {
             await _userRepository.MarkFilialsAsDeleted(user);
-            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));           
+            var filials = await _filialRepository.GetAllAsync(x => m.FilialIds.Contains(x.Id));
             foreach (var filial in filials)
             {
                 user.FilialUsers.Add(new FilialUser

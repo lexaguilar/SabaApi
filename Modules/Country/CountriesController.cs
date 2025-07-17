@@ -28,7 +28,10 @@ public class CountriesController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
     {
-        filters ??= new Dictionary<string, string>();
+        var user = this.GetUser();
+
+        filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
+        
         filters.TryAdd("all-items", "true");
 
         var (success, countries, message) = await _countryServices.GetAll(skip, take, filters);
