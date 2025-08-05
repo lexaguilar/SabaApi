@@ -106,7 +106,7 @@ public class SurveyUsersServices : ISurveyUsersServices
             FilialId = m.FilialId,
             SurveyUserStateId = m.SurveyUserStateId,
             Observation = m.Observation,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
             CreatedByUserId = m.UserEditId,
             SurveyUserResponses = surveyUserResponses
         };
@@ -127,7 +127,7 @@ public class SurveyUsersServices : ISurveyUsersServices
         item.FilialId = m.FilialId;
         item.SurveyUserStateId = m.SurveyUserStateId;
         item.Observation = m.Observation;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserEditId;
 
         await _surveyUserRepository.UpdateAsync(item);
@@ -215,7 +215,7 @@ public class SurveyUsersServices : ISurveyUsersServices
 
         var startDate = item.StartDate;
         if (!startDate.HasValue)
-            item.StartDate = DateTime.UtcNow;
+            item.StartDate = DatetimeHelper.getDateTimeZoneInfo();
 
         if (Latitude.HasValue && Longitude.HasValue)
         {
@@ -271,9 +271,9 @@ public class SurveyUsersServices : ISurveyUsersServices
         item.SurveyUserStateId = (int)SurveyStates.Finalizado;
         item.AdministratorNameFilial = model.AdministratorNameFilial;
         item.OwnerFilial = model.OwnerFilial;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
-        item.EndDate = DateTime.UtcNow;
+        item.EndDate = DatetimeHelper.getDateTimeZoneInfo();
 
         await _surveyUserRepository.UpdateAsync(item);
         await _surveyUserRepository.SaveChangesAsync();
@@ -290,7 +290,7 @@ public class SurveyUsersServices : ISurveyUsersServices
             return (false, null, "La encuesta no está en estado finalizado.");
 
         item.SurveyUserStateId = (int)SurveyStates.EnProgreso;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
 
         await _surveyUserRepository.UpdateAsync(item);

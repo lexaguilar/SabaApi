@@ -80,14 +80,14 @@ public class UsersServices : IUsersServices
             IsActive = m.IsActive,
             Password = pass,
             PasswordSalt = salt,
-            CreateDate = DateTime.UtcNow,
-            LastLoginDate = DateTime.UtcNow,
-            LastPasswordChangedDate = DateTime.UtcNow,
-            LastLockoutDate = DateTime.UtcNow,
+            CreateDate = DatetimeHelper.getDateTimeZoneInfo(),
+            LastLoginDate = DatetimeHelper.getDateTimeZoneInfo(),
+            LastPasswordChangedDate = DatetimeHelper.getDateTimeZoneInfo(),
+            LastLockoutDate = DatetimeHelper.getDateTimeZoneInfo(),
             FailedPasswordAttemptCount = 0,
-            FailedPasswordAttemptWindowStart = DateTime.UtcNow,
+            FailedPasswordAttemptWindowStart = DatetimeHelper.getDateTimeZoneInfo(),
             TempToken = null,
-            TempTokenExpiration = DateTime.UtcNow,
+            TempTokenExpiration = DatetimeHelper.getDateTimeZoneInfo(),
             CountryId = m.CountryId
         };
 

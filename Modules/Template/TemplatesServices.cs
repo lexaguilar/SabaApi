@@ -58,7 +58,7 @@ public class TemplatesServices : ITemplatesServices
            Name = m.Name,
            Description = m.Description,
            Active = m.Active,
-           CreatedAt = DateTime.UtcNow,
+           CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
            CreatedByUserId = m.UserId,
            CountryId = m.CountryId
         };
@@ -81,7 +81,7 @@ public class TemplatesServices : ITemplatesServices
         item.Name = m.Name;
         item.Description = m.Description;
         item.Active = m.Active;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserId;
         item.CountryId = m.CountryId;
 

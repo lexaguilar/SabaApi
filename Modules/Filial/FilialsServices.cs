@@ -63,7 +63,7 @@ public class FilialsServices : IFilialsServices
             Lat = m.Lat,
             Lng = m.Lng,
             Active = m.Active,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
             CreatedByUserId = m.UserId
         };
 
@@ -88,7 +88,7 @@ public class FilialsServices : IFilialsServices
         item.Lat = m.Lat;
         item.Lng = m.Lng;
         item.Active = m.Active;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserId;
 
         await _filialRepository.UpdateAsync(item);

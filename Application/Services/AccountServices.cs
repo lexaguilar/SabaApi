@@ -49,7 +49,7 @@ public class AccountService : IAccountService
         var (passwordHash, salt) = CryptoHelper.ComputePassword(m.NewPassword);
         user.Password = passwordHash;
         user.PasswordSalt = salt;
-        user.LastPasswordChangedDate = DateTime.UtcNow;
+        user.LastPasswordChangedDate = DatetimeHelper.getDateTimeZoneInfo();
         await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
@@ -65,7 +65,7 @@ public class AccountService : IAccountService
         var (passwordHash, salt) = CryptoHelper.ComputePassword(m.NewPassword);
         user.Password = passwordHash;
         user.PasswordSalt = salt;
-        user.LastPasswordChangedDate = DateTime.UtcNow;
+        user.LastPasswordChangedDate = DatetimeHelper.getDateTimeZoneInfo();
         await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
@@ -104,7 +104,7 @@ public class AccountService : IAccountService
         var password = PasswordHelper.GeneratePassword(8, 2, 2, 2, 2);
         var (passwordHash, salt) = CryptoHelper.ComputePassword(password);
 
-        user.LastPasswordChangedDate = DateTime.UtcNow;
+        user.LastPasswordChangedDate = DatetimeHelper.getDateTimeZoneInfo();
         user.Password = passwordHash;
         user.PasswordSalt = salt;
 
@@ -138,7 +138,7 @@ public class AccountService : IAccountService
             return (false, null, "Invalid username or password.");
         }
 
-        user.LastLoginDate = DateTime.UtcNow;
+        user.LastLoginDate = DatetimeHelper.getDateTimeZoneInfo();
         await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
@@ -172,7 +172,7 @@ public class AccountService : IAccountService
         var tokenHandler = new JwtSecurityTokenHandler();
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.SecretToken));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-        DateTime expires = DateTime.UtcNow.AddHours(10);
+        DateTime expires = DatetimeHelper.getDateTimeZoneInfo().AddHours(10);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

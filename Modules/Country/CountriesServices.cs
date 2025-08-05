@@ -50,7 +50,7 @@ public class CountriesServices : ICountriesServices
            Id = m.Id,
            Name = m.Name,
            Active = m.Active,
-           CreatedAt = DateTime.UtcNow,
+           CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
            CreatedByUserId = m.UserId
         };
 
@@ -70,7 +70,7 @@ public class CountriesServices : ICountriesServices
 
         item.Name = m.Name;
         item.Active = m.Active;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserId;
 
         await _countryRepository.UpdateAsync(item);

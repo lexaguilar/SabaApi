@@ -54,7 +54,7 @@ public class GenericCatalogsServices : IGenericCatalogsServices
             CatalogNameId = m.CatalogNameId,
             CatalogValue = m.CatalogValue,
             Active = m.Active,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
             CreatedByUserId = m.UserId
         };
 
@@ -75,7 +75,7 @@ public class GenericCatalogsServices : IGenericCatalogsServices
         item.CatalogNameId = m.CatalogNameId;        
         item.CatalogValue = m.CatalogValue;
         item.Active = m.Active;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserId;
 
         await _genericCatalogRepository.UpdateAsync(item);

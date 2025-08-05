@@ -83,7 +83,7 @@ public class SurveysServices : ISurveysServices
             ExpectedGoal = m.ExpectedGoal,
             Active = m.Active,
             SurveyStateId = 1, //Pending
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
             CreatedByUserId = m.UserId
         };
 
@@ -112,7 +112,7 @@ public class SurveysServices : ISurveysServices
         item.MinGoal = m.MinGoal;
         item.ExpectedGoal = m.ExpectedGoal;
         item.Active = m.Active;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = m.UserId;
 
         await _surveyRepository.UpdateAsync(item);
@@ -194,9 +194,9 @@ public class SurveysServices : ISurveysServices
         if (item.SurveyStateId != (int)SurveyStates.Pendiente && item.SurveyStateId != (int)SurveyStates.Pausado)
             return (false, null, "El survey no está en estado pendiente o pausado.");
 
-        item.StartedDate = DateTime.UtcNow;
+        item.StartedDate = DatetimeHelper.getDateTimeZoneInfo();
         item.SurveyStateId = (int)SurveyStates.EnProgreso;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
 
         await _surveyRepository.UpdateAsync(item);
@@ -213,9 +213,9 @@ public class SurveysServices : ISurveysServices
         if (item.SurveyStateId != (int)SurveyStates.EnProgreso)
             return (false, null, "El survey no está en estado en progreso.");
 
-        item.FinishedDate = DateTime.UtcNow;
+        item.FinishedDate = DatetimeHelper.getDateTimeZoneInfo();
         item.SurveyStateId = (int)SurveyStates.Finalizado;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
 
         await _surveyRepository.UpdateAsync(item);
@@ -233,7 +233,7 @@ public class SurveysServices : ISurveysServices
             return (false, null, "El survey no está en estado en progreso.");
 
         item.SurveyStateId = (int)SurveyStates.Pausado;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
 
         await _surveyRepository.UpdateAsync(item);
@@ -251,7 +251,7 @@ public class SurveysServices : ISurveysServices
             return (false, null, "El survey no está en estado pausado.");
 
         item.SurveyStateId = (int)SurveyStates.EnProgreso;
-        item.EditedAt = DateTime.UtcNow;
+        item.EditedAt = DatetimeHelper.getDateTimeZoneInfo();
         item.EditedByUserId = userId;
 
         await _surveyRepository.UpdateAsync(item);
