@@ -128,6 +128,8 @@ public class UsersServices : IUsersServices
 
         await _messageService.SendAsync(message);
 
+        newUser = await _userRepository.GetAsync(x => x.Id == newUser.Id);
+
         var userModel = MapToUserResponseModel(newUser);
         return (true, userModel, null);
 
