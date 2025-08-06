@@ -154,6 +154,9 @@ public class ReportsController : ControllerBase
 
 
     sb.AppendLine("<div style='border: 1px solid #aaa; '></div>");
+    sb.AppendLine("<div style='text-align: center; margin-top: 20px;'>Coordenadas de la Filial: " + survey.FilialLatitude + ", " + survey.FilialLongitude + "</div>");
+    sb.AppendLine("<div style='text-align: center; margin-top: 20px;'>Coordenadas de la encuesta: " + survey.Latitude + ", " + survey.Longitude + "</div>");
+    sb.AppendLine("<div style='text-align: center; margin-top: 20px;'>Distancia aproximada: " + survey.Distance + " km</div>");
     sb.AppendLine("<script>window.onload = () => window.print();</script>");
     sb.AppendLine("</body></html>");
 

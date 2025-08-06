@@ -13,6 +13,7 @@ public partial class SurveyUserResponseRequestModel
     public decimal? Longitude { get; set; }
     public string? FileNameUploaded { get; set; }
     public string? Comment { get; set; }
+    public string? Username { get; set; }
 
 }
 

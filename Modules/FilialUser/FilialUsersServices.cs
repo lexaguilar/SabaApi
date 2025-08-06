@@ -10,6 +10,7 @@ namespace Saba.Application.Services;
 public interface IFilialUsersServices
 {
     Task<(bool success, FilialUserPageResponseModel filialUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
+    Task<(bool success, FilialUserPageResponseModel filialUserResult, string? message)> GetByUserAll(int userId);
 }
 
 public class FilialUsersServices : IFilialUsersServices
@@ -46,13 +47,26 @@ public class FilialUsersServices : IFilialUsersServices
 
         var totalCount = items.Count();
 
-        if(filters.Any(x => x.Key == "all-items" && x.Value == "true"))
+        if (filters.Any(x => x.Key == "all-items" && x.Value == "true"))
         {
             page = 0;
             pageSize = totalCount;
         }
 
         items = items.Skip(page).Take(pageSize);
+        var list = items.ToList().Select(x => MapToFilialUserResponseModel(x));
+
+        return (true, new FilialUserPageResponseModel { Items = list, TotalCount = totalCount }, null);
+    }
+
+    public async Task<(bool success, FilialUserPageResponseModel filialUserResult, string? message)> GetByUserAll(int userId)
+    {
+        var items = await _filialUserRepository.GetAllAsync();
+        items = items.Where(x => x.UserId == userId);
+
+        var totalCount = items.Count();
+
+        items = items.Skip(0).Take(totalCount);
         var list = items.ToList().Select(x => MapToFilialUserResponseModel(x));
 
         return (true, new FilialUserPageResponseModel { Items = list, TotalCount = totalCount }, null);

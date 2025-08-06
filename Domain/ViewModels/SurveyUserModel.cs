@@ -54,7 +54,23 @@ public partial class FinishSurveyUserRequestModel
 public partial class SurveyUserIssuesResponseModel
 {
     public int FilialId { get; set; }
-    public string FilialName { get; set; } 
-    public int Issues { get; set; } 
+    public string FilialName { get; set; }
+    public int Issues { get; set; }
+
+}
+
+public class SurveyUserResponseIssuesResponseModel
+{
+    public int SurveyId { get; set; }
+    public int SurveyUserId { get; set; }
+    public int FilialId { get; set; }
+    public string FilialName { get; set; }
+    public int QuestionId { get; set; }
+    public string Question { get; set; }
+    public string Response { get; set; } 
+    public string Comment { get; set; } 
+    public string Username { get; set; } 
+    public DateTime? CompletedAt { get; set; }
+    
     
 }

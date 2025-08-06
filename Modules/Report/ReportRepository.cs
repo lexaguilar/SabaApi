@@ -64,11 +64,17 @@ public class ReportRepository : IReportRepository
         //              };
 
         var report = await _context.SurveyUsers.
+            Include(su => su.Filial).
             Where(su => su.Id == surveyUserId)
             .Select(su => new ReportResponseModel
             {
                 Id = su.Id,
+                Latitude = su.Latitude ?? 0,
+                Longitude = su.Longitude ?? 0,
                 FilialName = su.Filial.Name,
+                FilialLatitude = su.Filial.Lat ?? 0,
+                FilialLongitude = su.Filial.Lng ?? 0,
+                Distance = su.Distance ?? 0,
                 Supervisor = $"{su.User.Name} {su.User.LastName}",
                 StartDate = su.StartDate ?? DateTime.MinValue,
                 EndDate = su.EndDate ?? DateTime.MinValue,

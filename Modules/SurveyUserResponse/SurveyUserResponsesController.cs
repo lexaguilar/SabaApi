@@ -73,7 +73,8 @@ public class SurveyUserResponsesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] SurveyUserResponseRequestModel model)
     {
-
+        var user = this.GetUser();
+        model.Username = user.UserName;
         var (success, surveyUserResponse, message) = await _surveyUserResponseServices.Add(model);
         if (!success) return BadRequest(new { message });
         return Ok(surveyUserResponse);
@@ -83,7 +84,8 @@ public class SurveyUserResponsesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] SurveyUserResponseRequestModel model)
     {
         if (id != model.Id) return BadRequest(new { message = "Id no coincide" });
-
+        var user = this.GetUser();
+        model.Username = user.UserName;
         var (success, surveyUserResponse, message) = await _surveyUserResponseServices.Update(model);
         if (!success) return BadRequest(new { message });
         return Ok(surveyUserResponse);

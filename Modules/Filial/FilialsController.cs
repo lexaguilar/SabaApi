@@ -12,10 +12,12 @@ using Saba.Domain.ViewModels;
 public class FilialsController : ControllerBase
 {
     private readonly IFilialsServices _filialsServices;
+    private readonly IFilialUsersServices _filialUsersServices;
 
-    public FilialsController(IFilialsServices filialsServices)
+    public FilialsController(IFilialsServices filialsServices, IFilialUsersServices filialUsersServices)
     {
         _filialsServices = filialsServices;
+        _filialUsersServices = filialUsersServices;
     }
 
     [HttpGet]
@@ -44,7 +46,19 @@ public class FilialsController : ControllerBase
         filters.TryAdd("all-items", "true");
 
         var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
-        if (!success) return Ok(Array.Empty<FilialResponseModel>());
+
+        var userFilials = await _filialUsersServices.GetByUserAll(user.Id);
+
+        if (userFilials.success)
+        {
+            var filialsFiltred = filials.Items.Where(f => userFilials.filialUserResult.Items.Any(uf => uf.FilialId == f.Id)).ToList();
+            return Ok(filialsFiltred);
+        }
+            
+
+        if (!success)
+            return Ok(Array.Empty<FilialResponseModel>());
+
         return Ok(filials.Items);
     }
 

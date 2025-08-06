@@ -10,6 +10,7 @@ public interface ISurveyUserRepository
     Task<IQueryable<SurveyUser>> GetAllAsync(Expression<Func<SurveyUser, bool>>? predicate = null);
     Task<SurveyUser?> GetAsync(Expression<Func<SurveyUser, bool>> predicate);
     Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date);
+    Task<SurveyUserResponseIssuesResponseModel[]> GetIssuesFoundDetailsAsync(int countryId, int filialId, DateTime date);
     Task AddAsync(SurveyUser surveyUser);
     Task UpdateAsync(SurveyUser surveyUser);
     Task RemoveAsync(SurveyUser surveyUser);
@@ -78,7 +79,7 @@ public class SurveyUserRepository : ISurveyUserRepository
 
     public Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date)
     {
-       
+
         var result = _context.SurveyUserResponses
         .Where(sur => sur.Response == "No" &&
                     sur.SurveyUser.CreatedAt.Year == date.Year &&
@@ -98,5 +99,34 @@ public class SurveyUserRepository : ISurveyUserRepository
         .ToList();
 
         return Task.FromResult(result.OrderByDescending(x => x.Issues).ToArray());
+    }
+
+    public Task<SurveyUserResponseIssuesResponseModel[]> GetIssuesFoundDetailsAsync(int countryId, int filialId, DateTime date)
+    {
+       
+        var result = _context.SurveyUserResponses
+        .Include(sur => sur.SurveyUser)
+        .Include(sur => sur.Question)
+        .Where(sur => sur.Response == "No" &&
+                    sur.SurveyUser.CreatedAt.Year == date.Year &&
+                    sur.SurveyUser.CreatedAt.Month == date.Month &&
+                    sur.SurveyUser.Survey.CountryId == countryId &&
+                    sur.SurveyUser.FilialId == filialId)
+        .Select(sur => new SurveyUserResponseIssuesResponseModel
+        {
+            SurveyId = sur.SurveyUser.SurveyId,
+            SurveyUserId = sur.SurveyUser.Id,
+            FilialId = sur.SurveyUser.FilialId,
+            FilialName = sur.SurveyUser.Filial.Name,
+            CompletedAt = sur.CompletedAt,
+            QuestionId = sur.QuestionId,
+            Question = sur.Question.Name,
+            Response = sur.Response,
+            Comment = sur.Comment,
+            Username = sur.Username,
+            //Images = sur.SurveyUserResponseFiles.Select(file => file.FileNameUploaded).ToArray()
+        });
+
+        return Task.FromResult(result.ToArray());
     }
 }

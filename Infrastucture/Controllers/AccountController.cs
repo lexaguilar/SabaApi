@@ -31,9 +31,15 @@ public class AccountController : ControllerBase
 
     [Authorize]
     [HttpGet("sign-in-with-token")]
-    public IActionResult SignInWithToken()
+    public async Task<IActionResult> SignInWithToken()
     {
-        return Ok(new { message = "sign-in-with-token" });
+        var user = this.GetUser();
+        var result = await accountService.LoginWithToken(user.UserName);
+
+        if (!result.success)
+            return BadRequest(new { message = result.message });
+
+        return Ok(result.User);
     }
     [Authorize]
     [HttpPost("change-password")]

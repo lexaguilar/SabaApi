@@ -126,4 +126,15 @@ public class SurveyUsersController : ControllerBase
 
         return Ok(issues);
     }
+
+    [HttpGet("issues-found-details")]
+    public async Task<IActionResult> IssuesFoundDetails([FromQuery] int countryId, [FromQuery] int filialId, [FromQuery] DateTime date)
+    {
+        var issues = await _surveyUserServices.GetIssuesFoundDetailsAsync(countryId, filialId, date);
+        if (issues == null || !issues.Any())
+            return Ok(Array.Empty<SurveyUserResponseIssuesResponseModel>());
+
+        return Ok(issues);
+    }
+
 }

@@ -67,6 +67,7 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
             QuestionId = m.QuestionId,
             Response = m.Response,
             CompletedAt = DatetimeHelper.getDateTimeZoneInfo(),
+            Username = m.Username
         };
 
         await _surveyUserResponseRepository.AddAsync(newSurveyUserResponse);
@@ -84,6 +85,7 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
         //item.QuestionId = m.QuestionId;
         item.Response = m.Response;
         item.Comment = m.Comment;
+        item.Username = m.Username;
         item.CompletedAt = DatetimeHelper.getDateTimeZoneInfo();
 
         await _surveyUserResponseRepository.UpdateAsync(item);

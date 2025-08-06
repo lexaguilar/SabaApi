@@ -19,6 +19,7 @@ public interface ISurveyUsersServices
     Task<(bool success, SurveyUserPageResponseModel surveyUserResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
     Task<(bool success, int total, string? message)> GetTotalCountByState(int? userId, int stateId);
     Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date);
+    Task<SurveyUserResponseIssuesResponseModel[]> GetIssuesFoundDetailsAsync(int countryId, int filialId, DateTime date);
 }
 
 public class SurveyUsersServices : ISurveyUsersServices
@@ -316,5 +317,9 @@ public class SurveyUsersServices : ISurveyUsersServices
     public Task<SurveyUserIssuesResponseModel[]> GetIssuesFoundAsync(int countryId, DateTime date)
     {
         return _surveyUserRepository.GetIssuesFoundAsync(countryId, date);
+    }
+    public Task<SurveyUserResponseIssuesResponseModel[]> GetIssuesFoundDetailsAsync(int countryId, int filialId, DateTime date)
+    {
+        return _surveyUserRepository.GetIssuesFoundDetailsAsync(countryId, filialId, date);
     }
 }

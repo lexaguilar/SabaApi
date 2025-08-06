@@ -22,6 +22,11 @@ public partial class ReportResponseModel
     public int Id { get; set; }
     public string FilialName { get; set; } = null!;
     public string Supervisor { get; set; } = null!;
+    public decimal Latitude { get; set; }
+    public decimal Longitude { get; set; }
+    public decimal FilialLatitude { get; set; }
+    public decimal FilialLongitude { get; set; }
+    public decimal Distance { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string AdministratorNameFilial { get; set; } = null!;

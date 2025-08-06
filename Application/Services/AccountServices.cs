@@ -14,6 +14,7 @@ namespace Saba.Application.Services;
 public interface IAccountService
 {
     Task<(bool success, LoginModelReponse? User, string? message)> Login(LoginModel m);
+    Task<(bool success, LoginModelReponse? User, string? message)> LoginWithToken(string userName);
 
     Task<(bool success, string message)> ResetPassword(string email);
 
@@ -134,6 +135,44 @@ public class AccountService : IAccountService
         var user = await _userRepository.GetAsync(x => x.UserName == m.UserName);
 
         if (user == null || !CryptoHelper.ComparePassword(m.Password, user.Password, user.PasswordSalt))
+        {
+            return (false, null, "Invalid username or password.");
+        }
+
+        user.LastLoginDate = DatetimeHelper.getDateTimeZoneInfo();
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+
+        var userModel = new UserModel
+        {
+            Id = user.Id,
+            IsAdmin = user.IsAdmin ?? false,
+            DisplayName = user.UserName,
+            Role = user.Role.Name,
+            RoleId = user.RoleId,
+            UserName = user.UserName,
+            Email = user.Email,
+            CountryId = user.CountryId,
+            CountryName = user.Country.Name
+        };
+
+        var userReponse = new LoginModelReponse
+        {
+            User = userModel,
+            AccessResources = user.Role.RoleResources != null ? string.Join(",", user.Role.RoleResources.Where(x => x.Action == 1).Select(x => x.ResourceKey)) : string.Empty
+        };
+
+        var token = AuthenticateUser(userReponse);
+        userReponse.Token = token.Token;
+
+        return (true, userReponse, null);
+    }
+
+    public async Task<(bool success, LoginModelReponse? User, string message)> LoginWithToken(string userName)
+    {
+        var user = await _userRepository.GetAsync(x => x.UserName == userName);
+
+        if (user == null)
         {
             return (false, null, "Invalid username or password.");
         }
