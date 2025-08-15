@@ -13,9 +13,11 @@ using Saba.Domain.ViewModels;
 public class TemplateQuestionsController : ControllerBase
 {
     private readonly ITemplateQuestionsServices _templateQuestionServices;
-    public TemplateQuestionsController(ITemplateQuestionsServices templateQuestionServices)
+    private readonly ISurveyUserResponsesServices _surveyUserResponsesServices;
+    public TemplateQuestionsController(ITemplateQuestionsServices templateQuestionServices, ISurveyUserResponsesServices surveyUserResponsesServices)
     {
         _templateQuestionServices = templateQuestionServices;
+        _surveyUserResponsesServices = surveyUserResponsesServices;
     }
 
     [HttpGet]
@@ -115,6 +117,11 @@ public class TemplateQuestionsController : ControllerBase
     [HttpGet("{id}/remove")]
     public async Task<IActionResult> Remove(int id)
     {
+        var hasSurveyResponses = await _surveyUserResponsesServices.AnyAsync(x => x.QuestionId == id);
+
+        if (hasSurveyResponses)
+            return BadRequest(new { message = "No se puede eliminar la pregunta porque tiene respuestas asociadas." });
+
         var (success, templateQuestion, message) = await _templateQuestionServices.Remove(id);
         if (!success) return BadRequest(new { message });
         return Ok(templateQuestion);

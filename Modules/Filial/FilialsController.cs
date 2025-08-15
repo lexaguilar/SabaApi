@@ -21,25 +21,27 @@ public class FilialsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> Get(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         var user = this.GetUser();
         filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
-        
+
         var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
         if (!success)
             return Ok(Array.Empty<TemplateResponseModel>());
 
-        return Ok(new {
+        return Ok(new
+        {
             items = filials.Items,
             totalCount = filials.TotalCount
         });
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery]Dictionary<string, string> filters)
+    public async Task<IActionResult> GetAll(int skip, int take, [FromQuery] Dictionary<string, string> filters)
     {
         var user = this.GetUser();
+        var hasViewAllFilials = ObjectExtensions.HasResource(user.Resources, "Sucursales:ViewAll");
 
         filters = ObjectExtensions.AddCountry(filters, user.Resources, user.CountryId);
 
@@ -47,14 +49,17 @@ public class FilialsController : ControllerBase
 
         var (success, filials, message) = await _filialsServices.GetAll(skip, take, filters);
 
-        var userFilials = await _filialUsersServices.GetByUserAll(user.Id);
-
-        if (userFilials.success)
+        if (!hasViewAllFilials)
         {
-            var filialsFiltred = filials.Items.Where(f => userFilials.filialUserResult.Items.Any(uf => uf.FilialId == f.Id)).ToList();
-            return Ok(filialsFiltred);
+            var userFilials = await _filialUsersServices.GetByUserAll(user.Id);
+
+            if (userFilials.success)
+            {
+                var filialsFiltred = filials.Items.Where(f => userFilials.filialUserResult.Items.Any(uf => uf.FilialId == f.Id)).ToList();
+                return Ok(filialsFiltred);
+            }
         }
-            
+
 
         if (!success)
             return Ok(Array.Empty<FilialResponseModel>());

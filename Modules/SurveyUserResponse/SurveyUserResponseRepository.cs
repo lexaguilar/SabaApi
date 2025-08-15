@@ -11,6 +11,7 @@ public interface ISurveyUserResponseRepository
     Task<IQueryable<SurveyUserResponse>> GetAllAsync(Expression<Func<SurveyUserResponse, bool>>? predicate = null);
     Task<DataTable> GetAllPivotAsync(int SurveyId);
     Task<SurveyUserResponse?> GetAsync(Expression<Func<SurveyUserResponse, bool>> predicate);
+    Task<bool> AnyAsync(Expression<Func<SurveyUserResponse, bool>> predicate);
     Task AddAsync(SurveyUserResponse surveyUserResponse);
     Task UpdateAsync(SurveyUserResponse surveyUserResponse);
     Task<int> SaveChangesAsync();
@@ -73,6 +74,12 @@ public class SurveyUserResponseRepository : ISurveyUserResponseRepository
         .Include(x => x.Question)
         .ThenInclude(x => x.CatalogName).Where(predicate).FirstOrDefault();
         return Task.FromResult(item);
+    }
+
+    public Task<bool> AnyAsync(Expression<Func<SurveyUserResponse, bool>> predicate)
+    {
+        var exists = _context.SurveyUserResponses.Any(predicate);
+        return Task.FromResult(exists);
     }
 
     public async Task AddAsync(SurveyUserResponse surveyUserResponse)

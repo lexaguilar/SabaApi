@@ -12,6 +12,7 @@ public interface ITemplatesServices
     Task<(bool success, TemplateResponseModel? template, string? message)> Add(TemplateRequestModel m);
     Task<(bool success, TemplateResponseModel? template, string? message)> Update(TemplateRequestModel m);
     Task<(bool success, TemplateResponseModel? template, string? message)> Disable(int id);
+    Task<(bool success, TemplateResponseModel? template, string? message)> Duplicate(int id, int UserId);
     Task<(bool success, TemplateResponseModel? template, string? message)> Enable(int id);
     Task<(bool success, TemplateResponseModel? template, string? message)> GetByUserName(string userName);
     Task<(bool success, TemplateResponseModel? template, string? message)> GetById(int id);
@@ -21,12 +22,14 @@ public interface ITemplatesServices
 public class TemplatesServices : ITemplatesServices
 {
     private readonly ITemplateRepository _templateRepository;
+    private readonly ITemplateQuestionsServices _templateQuestionsServices;
     private readonly AppSettings _appSettings;
 
-    public TemplatesServices(ITemplateRepository templateRepository, IOptions<AppSettings> appSettings)
+    public TemplatesServices(ITemplateRepository templateRepository, ITemplateQuestionsServices templateQuestionsServices, IOptions<AppSettings> appSettings)
     {
         _appSettings = appSettings.Value;
         _templateRepository = templateRepository;
+        _templateQuestionsServices = templateQuestionsServices;
     }
 
     private TemplateResponseModel MapToTemplateResponseModel(Template template)
@@ -140,6 +143,8 @@ public class TemplatesServices : ITemplatesServices
                     items = items.Where(x => x.Name.Contains(filter.Value));
                 if (filter.Key == "countryId")
                     items = items.Where(x => x.CountryId == int.Parse(filter.Value));
+                if (filter.Key == "active")
+                    items = items.Where(x => x.Active == bool.Parse(filter.Value));
             }
         }
 
@@ -155,5 +160,29 @@ public class TemplatesServices : ITemplatesServices
         var list = items.ToList().Select(x => MapToTemplateResponseModel(x));
 
         return (true, new TemplatePageResponseModel { Items = list, TotalCount = totalCount }, null);
+    }
+
+    public async Task<(bool success, TemplateResponseModel? template, string? message)> Duplicate(int id, int userId)
+    {
+        var item = await _templateRepository.GetAsync(x => x.Id == id);
+        if (item == null) return (false, null, "No encontrado.");
+
+        var newItem = new Template
+        {
+            TemplateCode = item.TemplateCode,
+            Name = item.Name + " - Copia",
+            Description = item.Description,
+            Active = item.Active,
+            CreatedAt = DatetimeHelper.getDateTimeZoneInfo(),
+            CreatedByUserId = userId,
+            CountryId = item.CountryId
+        };
+
+        await _templateRepository.AddAsync(newItem);
+        await _templateRepository.SaveChangesAsync();
+
+        await _templateQuestionsServices.GetAll(item.Id, newItem.Id);
+
+        return (true, MapToTemplateResponseModel(newItem), null);
     }
 }

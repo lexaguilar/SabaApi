@@ -91,4 +91,13 @@ public class TemplatesController : ControllerBase
         if (!success) return BadRequest(new { message });
         return Ok(template);
     }
+
+    [HttpGet("{id}/duplicate")]
+    public async Task<IActionResult> Duplicate(int id)
+    {
+        var user = this.GetUser();
+        var (success, template, message) = await _templateServices.Duplicate(id, user.Id);
+        if (!success) return BadRequest(new { message });
+        return Ok(template);
+    }
 }

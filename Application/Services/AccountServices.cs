@@ -85,7 +85,7 @@ public class AccountService : IAccountService
             message.Body = new TextPart("html")
             {
                 Text = $"<h1>Cambio de contraseña</h1><p>Su contraseña ha sido cambiada exitosamente.</p><p>Su nueva contraseña es: {m.NewPassword}</p>"
-            };
+            };   
 
             // Send email with the token
             await _messageService.SendAsync(message);

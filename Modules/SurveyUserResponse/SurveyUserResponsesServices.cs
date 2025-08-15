@@ -5,6 +5,7 @@ using Saba.Domain.ViewModels;
 using Saba.Repository;
 using Saba.Application.Extensions;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace Saba.Application.Services;
 
@@ -15,6 +16,7 @@ public interface ISurveyUserResponsesServices
     Task<(bool success, SurveyUserResponseResponseModel? surveyUserResponse, string? message)> GetById(int id);
     Task<(bool success, SurveyUserResponsePageResponseModel surveyUserResponseResult, string? message)> GetAll(int page, int pageSize, Dictionary<string, string> filters = null);
     Task<(bool success, DataTable surveyUserResponseResult, string? message)> GetPivotAll(int surveyId);
+    Task<bool> AnyAsync(Expression<Func<SurveyUserResponse, bool>> predicate);
 }
 
 public class SurveyUserResponsesServices : ISurveyUserResponsesServices
@@ -137,5 +139,10 @@ public class SurveyUserResponsesServices : ISurveyUserResponsesServices
         var items = await _surveyUserResponseRepository.GetAllPivotAsync(surveyId);
 
         return (true, items, null);
+    }
+
+    public async Task<bool> AnyAsync(Expression<Func<SurveyUserResponse, bool>> predicate)
+    {
+        return await _surveyUserResponseRepository.AnyAsync(predicate);
     }
 }
